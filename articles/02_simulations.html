@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title> • recallreproducibility</title>
+<title>2. Clustering Simulated Data (Figure 1) • recallreproducibility</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="2. Clustering Simulated Data (Figure 1)">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,7 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/01_figure1b-e.html">1. Clustering Simple Simulated Data (Figure 1)</a></li>
-    <li><a class="dropdown-item" href="../articles/02_simulations.html">UNKNOWN TITLE</a></li>
+    <li><a class="dropdown-item" href="../articles/02_simulations.html">2. Clustering Simulated Data (Figure 1)</a></li>
     <li><a class="dropdown-item" href="../articles/03_figure1f_S2-8.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/04_figure3.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/04_rare_cell_type_simulations.html">UNKNOWN TITLE</a></li>
@@ -68,7 +68,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1></h1>
+      <h1>2. Clustering Simulated Data (Figure 1)</h1>
             
       
 
@@ -77,7 +77,293 @@
 
     
     
-
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/splatter/" class="external-link">splatter</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LaplacesDemonR/LaplacesDemon" class="external-link">LaplacesDemon</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scSHC</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CHOIR</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>We write a function for simulating data and running each clustering
+method.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simulation</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">num_groups</span>, <span class="va">num_cells</span>, <span class="va">num_genes</span>, <span class="va">de_prob</span>, <span class="va">seed</span>, <span class="va">cores</span>, <span class="va">shared_memory_max</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="va">seed</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">cell_type_proportions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">rdirichlet</span><span class="op">(</span><span class="fl">1</span>, alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">num_groups</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"cell_type_proportions"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cell_type_proportions</span><span class="op">)</span></span>
+<span>  </span>
+<span></span>
+<span>  <span class="va">sim.groups</span> <span class="op">&lt;-</span> <span class="fu">splatter</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/splatter/man/splatSimulate.html" class="external-link">splatSimulate</a></span><span class="op">(</span>group.prob <span class="op">=</span> <span class="va">cell_type_proportions</span>, method <span class="op">=</span> <span class="st">"groups"</span>,</span>
+<span>                                        verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                        nGenes <span class="op">=</span> <span class="va">num_genes</span>,</span>
+<span>                                        batchCells <span class="op">=</span> <span class="va">num_cells</span>,</span>
+<span>                                        dropout.type <span class="op">=</span> <span class="st">"experiment"</span>, </span>
+<span>                                        de.prob <span class="op">=</span> <span class="va">de_prob</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/as.Seurat.html" class="external-link">as.Seurat</a></span><span class="op">(</span><span class="va">sim.groups</span>, counts <span class="op">=</span> <span class="st">"counts"</span>, data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">SeuratObject</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/RenameAssays.html" class="external-link">RenameAssays</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seurat_obj</span>, originalexp <span class="op">=</span> <span class="st">'RNA'</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">num_groups</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">Group</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/NormalizeData.html" class="external-link">NormalizeData</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindVariableFeatures.html" class="external-link">FindVariableFeatures</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindNeighbors.html" class="external-link">FindNeighbors</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">seurat_obj</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall NB-copula"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_copula_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_copula_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">recall_nb_copula_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">FindClustersCallback</span><span class="op">(</span><span class="va">seurat_obj</span>, null_method <span class="op">=</span> <span class="st">"NB-copula"</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">recall_NB_copula_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running CHOIR"</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">CHOIR</span><span class="op">(</span><span class="va">seurat_obj</span>, </span>
+<span>                      n_cores <span class="op">=</span> <span class="va">cores</span>,</span>
+<span>                      reduction <span class="op">=</span> <span class="va">seurat_obj</span><span class="op">@</span><span class="va">reductions</span><span class="op">$</span><span class="va">pca</span><span class="op">@</span><span class="va">cell.embeddings</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
+<span>                      var_features <span class="op">=</span> <span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">CHOIR_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall ZIP"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_ZIP_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">recall__ZIP_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">recall_zip_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">FindClustersCallback</span><span class="op">(</span><span class="va">seurat_obj</span>, null_method <span class="op">=</span> <span class="st">"ZIP"</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">recall_ZIP_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall negative binomial"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">recall_nb_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">FindClustersCallback</span><span class="op">(</span><span class="va">seurat_obj</span>, null_method <span class="op">=</span> <span class="st">"NB"</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span> <span class="co">#,resolution_start = 2.4)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">recall_NB_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall Poisson-copula"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_Poisson_copula_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">recall_Poisson_copula_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">recall_poisson_copula_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu">FindClustersCallback</span><span class="op">(</span><span class="va">seurat_obj</span>, null_method <span class="op">=</span> <span class="st">"Poisson-copula"</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">recall_Poisson_copula_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co">#print("running recall Gaussian-copula")</span></span>
+<span>  <span class="co">#recall_gaussian_copula_seurat_obj &lt;- FindClustersCallback(seurat_obj, null_method = "Gaussian-copula", cores = cores)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall countsplit"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_countsplit_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">recall_countsplit_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">countsplit_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://lcrawlab.github.io/recall/reference/FindClustersCountsplit.html" class="external-link">FindClustersCountsplit</a></span><span class="op">(</span><span class="va">seurat_obj</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">recall_countsplit_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running scSHC"</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">scSHC_clusters</span> <span class="op">&lt;-</span> <span class="fu">scSHC</span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                       assay <span class="op">=</span> <span class="st">"RNA"</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span><span class="op">[</span><span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span>,<span class="op">]</span>,</span>
+<span>                          num_features <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>                          num_PCs <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                          cores <span class="op">=</span> <span class="va">cores</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
+<span>  <span class="va">scSHC_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"storing cluster labels"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_ZIP"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_zip_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">callback_clusters</span></span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_NB"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_nb_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">callback_clusters</span></span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_NB-copula"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_nb_copula_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">callback_clusters</span></span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_Poisson-copula"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_poisson_copula_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">callback_clusters</span></span>
+<span>  <span class="co">#seurat_obj[["recall_Gaussian-copula"]] &lt;- recall_gaussian_copula_seurat_obj@meta.data$callback_clusters</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_countsplit"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">countsplit_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">callback_clusters</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">'scSHC'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">scSHC_clusters</span></span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"CHOIR"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">CHOIR_clusters_0.05</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"logging timing and memory metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_ZIP_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">recall_ZIP_end_time</span>, <span class="va">recall_ZIP_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">recall_NB_end_time</span>, <span class="va">recall_NB_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_copula_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">recall_NB_copula_end_time</span>, <span class="va">recall_NB_copula_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_Poisson_copula_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">recall_Poisson_copula_end_time</span>, <span class="va">recall_Poisson_copula_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_countsplit_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">recall_countsplit_end_time</span>, <span class="va">recall_countsplit_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">scSHC_end_time</span>, <span class="va">scSHC_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">CHOIR_end_time</span>, <span class="va">CHOIR_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"logging timing and memory"</span><span class="op">)</span></span>
+<span>  <span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">recall_ZIP_time_taken</span>,</span>
+<span>            <span class="va">recall_NB_time_taken</span>,</span>
+<span>            <span class="va">recall_NB_copula_time_taken</span>,</span>
+<span>            <span class="va">recall_Poisson_copula_time_taken</span>,</span>
+<span>            <span class="va">recall_countsplit_time_taken</span>,</span>
+<span>            <span class="va">scSHC_time_taken</span>,</span>
+<span>            <span class="va">CHOIR_time_taken</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">method</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"recall+ZIP"</span>, </span>
+<span>              <span class="st">"recall+NB"</span>, </span>
+<span>              <span class="st">"recall+NB-copula"</span>, </span>
+<span>              <span class="st">"recall+Poisson-copula"</span>, </span>
+<span>              <span class="st">"Recall+countsplit"</span>, </span>
+<span>              <span class="st">"sc-SHC"</span>, </span>
+<span>              <span class="st">"CHOIR"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">memory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">recall__ZIP_memory</span>,</span>
+<span>              <span class="va">recall_NB_memory</span>,</span>
+<span>              <span class="va">recall_NB_copula_memory</span>,</span>
+<span>              <span class="va">recall_Poisson_copula_memory</span>,</span>
+<span>              <span class="va">recall_countsplit_memory</span>,</span>
+<span>              <span class="va">scSHC_memory</span>,</span>
+<span>              <span class="va">CHOIR_memory</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">method</span>, <span class="va">time</span>, <span class="va">memory</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">'timing memory df'</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>seurat_obj<span class="op">=</span><span class="va">seurat_obj</span>, timing_memory_df<span class="op">=</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>First, w set up the simulation paramters. This script was run with
+various parameter choices on an HPC system.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">args</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/commandArgs.html" class="external-link">commandArgs</a></span><span class="op">(</span>trailingOnly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">num_groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">num_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">args</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">num_replicates</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
+<span><span class="va">num_genes</span> <span class="op">&lt;-</span> <span class="fl">5000</span></span>
+<span><span class="va">de_prob</span> <span class="op">&lt;-</span> <span class="fl">0.10</span></span>
+<span></span>
+<span><span class="va">num_cores</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
+<span></span>
+<span><span class="va">cluster_metrics_df</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">timing_memory_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">shared_memory_max</span> <span class="op">=</span> <span class="fl">16000</span> <span class="op">*</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span></span></code></pre></div>
+<p>We run the specified simulations and store the clustering metrics
+from the results for each method.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">replicate</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">num_replicates</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"num groups"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"num cells"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">num_cells</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"replicate (and seed)"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">replicate</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">seed</span> <span class="op">&lt;-</span> <span class="va">replicate</span></span>
+<span>  </span>
+<span>  <span class="va">simulation_res</span> <span class="op">&lt;-</span> <span class="fu">simulation</span><span class="op">(</span><span class="va">num_groups</span>, <span class="va">num_cells</span>, <span class="va">num_genes</span>, <span class="va">de_prob</span>, <span class="va">seed</span>, cores<span class="op">=</span><span class="va">num_cores</span>, shared_memory_max<span class="op">=</span><span class="va">shared_memory_max</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="va">simulation_res</span><span class="op">$</span><span class="va">seurat_obj</span></span>
+<span>  <span class="va">timing_memory_df_replicate</span> <span class="op">&lt;-</span> <span class="va">simulation_res</span><span class="op">$</span><span class="va">timing_memory_df</span></span>
+<span>  </span>
+<span></span>
+<span>  <span class="co"># clustering metrics</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"recall zip metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_ZIP_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                    <span class="st">"Group"</span>,</span>
+<span>                                                    <span class="st">"recall_ZIP"</span>,</span>
+<span>                                                    <span class="va">replicate</span>,</span>
+<span>                                                    <span class="va">num_cells</span>,</span>
+<span>                                                    <span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"recall NB metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                        <span class="st">"Group"</span>,</span>
+<span>                                                        <span class="st">"recall_NB"</span>,</span>
+<span>                                                        <span class="va">replicate</span>,</span>
+<span>                                                        <span class="va">num_cells</span>,</span>
+<span>                                                        <span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"recall NB-copula metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_NB_copula_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                              <span class="st">"Group"</span>,</span>
+<span>                                                              <span class="st">"recall_NB-copula"</span>,</span>
+<span>                                                              <span class="va">replicate</span>,</span>
+<span>                                                              <span class="va">num_cells</span>,</span>
+<span>                                                              <span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"recall Poisson-copula metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_Poisson_copula_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                                   <span class="st">"Group"</span>,</span>
+<span>                                                                   <span class="st">"recall_Poisson-copula"</span>,</span>
+<span>                                                                   <span class="va">replicate</span>,</span>
+<span>                                                                   <span class="va">num_cells</span>,</span>
+<span>                                                                   <span class="va">num_groups</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"recall countsplit metrics"</span><span class="op">)</span></span>
+<span>  <span class="va">recall_countsplit_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                               <span class="st">"Group"</span>,</span>
+<span>                                                               <span class="st">"recall_countsplit"</span>,</span>
+<span>                                                               <span class="va">replicate</span>,</span>
+<span>                                                               <span class="va">num_cells</span>,</span>
+<span>                                                               <span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"scSHC metrics"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">scSHC_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                 <span class="st">"Group"</span>,</span>
+<span>                                                 <span class="st">"scSHC"</span>,</span>
+<span>                                                 <span class="va">replicate</span>,</span>
+<span>                                                 <span class="va">num_cells</span>,</span>
+<span>                                                 <span class="va">num_groups</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"CHOIR metrics"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">CHOIR_metrics_df_row</span> <span class="op">&lt;-</span> <span class="fu">recallreproducibility</span><span class="fu">::</span><span class="fu">get_clustering_metrics</span><span class="op">(</span><span class="va">seurat_obj</span>,</span>
+<span>                                                 <span class="st">"Group"</span>,</span>
+<span>                                                 <span class="st">"CHOIR"</span>,</span>
+<span>                                                 <span class="va">replicate</span>,</span>
+<span>                                                 <span class="va">num_cells</span>,</span>
+<span>                                                 <span class="va">num_groups</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">'making clustering metrics table'</span><span class="op">)</span></span>
+<span>  <span class="va">cluster_metrics_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">cluster_metrics_df</span>,</span>
+<span>                              <span class="va">recall_ZIP_metrics_df_row</span>,</span>
+<span>                              <span class="va">recall_NB_metrics_df_row</span>,</span>
+<span>                              <span class="va">recall_NB_copula_metrics_df_row</span>,</span>
+<span>                              <span class="va">recall_Poisson_copula_metrics_df_row</span>,</span>
+<span>                              <span class="co">#recall_Gaussian_copula_metrics_df_row,</span></span>
+<span>                              <span class="va">recall_countsplit_metrics_df_row</span>,</span>
+<span>                              <span class="va">scSHC_metrics_df_row</span>,</span>
+<span>                              <span class="va">CHOIR_metrics_df_row</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">'making timing/memory table'</span><span class="op">)</span></span>
+<span>  <span class="va">timing_memory_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">timing_memory_df</span>,</span>
+<span>                            <span class="va">timing_memory_df_replicate</span><span class="op">)</span></span>
+<span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Finally, we save the results of these simulations</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"writing final results"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">metrics_csv_filename</span> <span class="op">&lt;-</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_glue.html" class="external-link">str_glue</a></span><span class="op">(</span><span class="st">"clustering_metrics/simulations_num_groups_{num_groups}_num_cells_{num_cells}.csv"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">cluster_metrics_df</span>, <span class="va">metrics_csv_filename</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">timing_memory_csv_filename</span> <span class="op">&lt;-</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_glue.html" class="external-link">str_glue</a></span><span class="op">(</span><span class="st">"timing_memory/simulations_num_groups_{num_groups}_num_cells_{num_cells}_timing_memory.csv"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">timing_memory_df</span>, <span class="va">timing_memory_csv_filename</span><span class="op">)</span></span></code></pre></div>
   </main>
 </div>
 
