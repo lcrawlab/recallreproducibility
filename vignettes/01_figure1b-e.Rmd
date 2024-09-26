@@ -352,6 +352,6 @@ ggsave("fig1e.png", barplot_error_bars3, width = 1.2 * 1.2 * 1440, height = 1.3 
 
 One Goup                   |  Three Groups
 :-------------------------:|:-------------------------:
-![](fig1c.png){width=100%} | ![](ig1e.png){width=100%}
+![](fig1c.png){width=100%} | ![](fig1e.png){width=100%}
 
 
