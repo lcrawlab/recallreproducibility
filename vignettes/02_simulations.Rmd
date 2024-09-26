@@ -30,7 +30,7 @@ knitr::opts_chunk$set(eval = FALSE)
 suppressPackageStartupMessages({
 library(splatter)
 library(LaplacesDemon)
-library(callback)
+library(recall)
 library(Seurat)
 library(scSHC)
 library(CHOIR)
@@ -75,7 +75,7 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   print("running recall NB-copula")
   recall_NB_copula_start_time <- Sys.time()
   recall_NB_copula_memory <- peakRAM::peakRAM({
-    recall_nb_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB-copula", cores = cores, shared_memory_max = shared_memory_max)
+    recall_nb_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "NB-copula", cores = cores, shared_memory_max = shared_memory_max)
   })$Peak_RAM_Used_MiB
   recall_NB_copula_end_time <- Sys.time()
   
@@ -94,14 +94,14 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   print("running recall ZIP")
   recall_ZIP_start_time <- Sys.time()
   recall__ZIP_memory <- peakRAM::peakRAM({
-  recall_zip_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "ZIP", cores = cores, shared_memory_max = shared_memory_max)
+  recall_zip_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "ZIP", cores = cores, shared_memory_max = shared_memory_max)
   })$Peak_RAM_Used_MiB
   recall_ZIP_end_time <- Sys.time()
   
   print("running recall negative binomial")
   recall_NB_start_time <- Sys.time()
   recall_NB_memory <- peakRAM::peakRAM({
-  recall_nb_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB", cores = cores, shared_memory_max = shared_memory_max) #,resolution_start = 2.4)
+  recall_nb_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "NB", cores = cores, shared_memory_max = shared_memory_max) #,resolution_start = 2.4)
   })$Peak_RAM_Used_MiB
   recall_NB_end_time <- Sys.time()
     
@@ -109,12 +109,12 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   print("running recall Poisson-copula")
   recall_Poisson_copula_start_time <- Sys.time()
   recall_Poisson_copula_memory <- peakRAM::peakRAM({
-  recall_poisson_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Poisson-copula", cores = cores, shared_memory_max = shared_memory_max)
+  recall_poisson_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Poisson-copula", cores = cores, shared_memory_max = shared_memory_max)
   })$Peak_RAM_Used_MiB
   recall_Poisson_copula_end_time <- Sys.time()
   
   #print("running recall Gaussian-copula")
-  #recall_gaussian_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Gaussian-copula", cores = cores)
+  #recall_gaussian_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Gaussian-copula", cores = cores)
   
   print("running recall countsplit")
   recall_countsplit_start_time <- Sys.time()
@@ -138,13 +138,13 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   
   print("storing cluster labels")
   
-  seurat_obj[["recall_ZIP"]] <- recall_zip_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["recall_NB"]] <- recall_nb_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["recall_NB-copula"]] <- recall_nb_copula_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["recall_Poisson-copula"]] <- recall_poisson_copula_seurat_obj@meta.data$callback_clusters
-  #seurat_obj[["recall_Gaussian-copula"]] <- recall_gaussian_copula_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_ZIP"]] <- recall_zip_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_NB"]] <- recall_nb_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_NB-copula"]] <- recall_nb_copula_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_Poisson-copula"]] <- recall_poisson_copula_seurat_obj@meta.data$recall_clusters
+  #seurat_obj[["recall_Gaussian-copula"]] <- recall_gaussian_copula_seurat_obj@meta.data$recall_clusters
   
-  seurat_obj[["recall_countsplit"]] <- countsplit_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_countsplit"]] <- countsplit_seurat_obj@meta.data$recall_clusters
   
   
   seurat_obj[['scSHC']] <- scSHC_clusters
