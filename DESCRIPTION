@@ -4,7 +4,7 @@ Version: 1.0.0
 Authors@R: 
     person("Alan", "DenAdel", , "alan_denadel@brown.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7985-6789"))
-Description: recall (calibRatEd Clustering with ArtificiaL variabLes): is a method for protecting
+Description: recall (Calibrated Clustering with ArtificiaL Variables): is a method for protecting
  against over-clustering by controlling for the impact of double-dipping.
  This package reproduces the figures found in the recall manuscript.
 License: MIT + file LICENSE
