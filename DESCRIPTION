@@ -10,7 +10,6 @@ Description: recall (Calibrated Clustering with ArtificiaL Variables): is a meth
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Depends:
     R (>= 3.5.0)
