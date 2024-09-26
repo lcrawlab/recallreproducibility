@@ -1,8 +1,23 @@
 pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2024-09-26T20:03Z
+articles:
+  01_figure1b-e: 01_figure1b-e.html
+  02_simulations: 02_simulations.html
+  03_figure1f_S2-8: 03_figure1f_S2-8.html
+  04_figure3: 04_figure3.html
+  04_rare_cell_type_simulations: 04_rare_cell_type_simulations.html
+  06_cluster-tabula-muris: 06_cluster-tabula-muris.html
+  07_tabula_muris_clustering_metrics: 07_tabula_muris_clustering_metrics.html
+  08_figure2_S11-16_S37: 08_figure2_S11-16_S37.html
+  09_figure3: 09_figure3.html
+  10_tissue_umaps: 10_tissue_umaps.html
+  11_tabula_muris_rare_cell_types: 11_tabula_muris_rare_cell_types.html
+  12_S39_DE_comparison: 12_S39_DE_comparison.html
+  13_multi-dataset-timing: 13_multi-dataset-timing.html
+  14_seurat_data_and_liver_timing: 14_seurat_data_and_liver_timing.html
+  15_pbmc-timing: 15_pbmc-timing.html
+last_built: 2024-09-26T21:14Z
 urls:
   reference: https://lcrawlab.github.io/recallreproducibility/reference
   article: https://lcrawlab.github.io/recallreproducibility/articles
