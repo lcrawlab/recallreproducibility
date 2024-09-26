@@ -167,7 +167,7 @@ We repeat this simulation 1000 times and save the results.
 num_replicates <- 1000
 
 num_seurat_clusters <- c()
-num_callback_clusters <- c()
+num_recall_clusters <- c()
 
 for (i in 1:num_replicates) {
   print("Replicate")
@@ -186,21 +186,21 @@ for (i in 1:num_replicates) {
   
   seurat_obj@meta.data$Group = 1
   
-  seurat_obj <- callback::seurat_workflow(seurat_obj, num_variable_features = 1000, resolution_param = 0.8, algorithm = "NA", visualization_method = "NA")
-  seurat_obj <- callback::FindClustersCallback(seurat_obj, cores=12)
+  seurat_obj <- recall::seurat_workflow(seurat_obj, num_variable_features = 1000, resolution_param = 0.8, algorithm = "NA", visualization_method = "NA")
+  seurat_obj <- recall::FindClustersRecall(seurat_obj, cores=12)
   
   num_seurat_clusters[i] <- length(levels(seurat_obj@meta.data$seurat_clusters))
-  num_callback_clusters[i] <- length(levels(seurat_obj@meta.data$callback_clusters))
+  num_recall_clusters[i] <- length(levels(seurat_obj@meta.data$recall_clusters))
 }
 
 num_groups <- rep(1, num_replicates)
 
-df_1_group <- data.frame(num_groups, num_seurat_clusters, num_callback_clusters)
+df_1_group <- data.frame(num_groups, num_seurat_clusters, num_recall_clusters)
 
 
 
 num_seurat_clusters <- c()
-num_callback_clusters <- c()
+num_recall_clusters <- c()
 
 for (i in 1:num_replicates) {
   print("Replicate")
@@ -215,16 +215,16 @@ for (i in 1:num_replicates) {
   seurat_obj <- Seurat::as.Seurat(sim.groups, counts = "counts", data = NULL)
   seurat_obj <- SeuratObject::RenameAssays(object = seurat_obj, originalexp = 'RNA')
 
-  seurat_obj <- callback::seurat_workflow(seurat_obj, num_variable_features = 1000, resolution_param = 0.8, algorithm = "NA", visualization_method = "NA")
-  seurat_obj <- callback::FindClustersCallback(seurat_obj, cores=24)
+  seurat_obj <- recall::seurat_workflow(seurat_obj, num_variable_features = 1000, resolution_param = 0.8, algorithm = "NA", visualization_method = "NA")
+  seurat_obj <- recall::FindClustersRecall(seurat_obj, cores=24)
   
   num_seurat_clusters[i] <- length(levels(seurat_obj@meta.data$seurat_clusters))
-  num_callback_clusters[i] <- length(levels(seurat_obj@meta.data$callback_clusters))
+  num_recall_clusters[i] <- length(levels(seurat_obj@meta.data$recall_clusters))
 }
 
 num_groups <- rep(3, num_replicates)
 
-df_3_groups <- data.frame(num_groups, num_seurat_clusters, num_callback_clusters)
+df_3_groups <- data.frame(num_groups, num_seurat_clusters, num_recall_clusters)
 
 
 write.csv(df_1_group, "one_group.csv")
@@ -239,8 +239,6 @@ library(ggplot2)
 library(reshape2)
 library(dplyr)
 library(ggpattern)
-
-setwd("~/Desktop/callback_review_scripts/figure1/")
 
 ```{r plot_replicates}
 
@@ -275,7 +273,7 @@ barplot_error_bars1 <- ggplot(df_summary_1_group) +
                    pattern_density = 0.05,
                    pattern_spacing = 0.05,
                    pattern_key_scale_factor = 0.6) +
-  scale_pattern_manual(values = c(num_seurat_clusters = "stripe", num_callback_clusters = "none")) + 
+  scale_pattern_manual(values = c(num_seurat_clusters = "stripe", num_recall_clusters = "none")) + 
   geom_errorbar( aes(x=method, ymin=mean-sd, ymax=mean+sd), width = 0.5, size=1) + 
   geom_hline(size = 1.5, aes(yintercept = 1, linetype="True Number\nof Groups")) +
   scale_linetype_manual(values = 2) +
@@ -323,7 +321,7 @@ barplot_error_bars3 <- ggplot(df_summary_3_groups) +
                    pattern_density = 0.05,
                    pattern_spacing = 0.05,
                    pattern_key_scale_factor = 0.6) +
-  scale_pattern_manual(values = c(num_seurat_clusters = "stripe", num_callback_clusters = "none")) + 
+  scale_pattern_manual(values = c(num_seurat_clusters = "stripe", num_recall_clusters = "none")) + 
   geom_errorbar( aes(x=method, ymin=mean-sd, ymax=mean+sd), width = 0.5, size=1) + 
   geom_hline(size = 1.5, aes(yintercept = 3, linetype="True Number\nof Groups")) +
   scale_linetype_manual(values = 2) +
