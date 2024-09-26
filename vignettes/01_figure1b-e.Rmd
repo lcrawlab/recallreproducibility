@@ -233,25 +233,31 @@ write.csv(df_3_groups, "three_groups.csv")
 
 
 
-Finally, we plot panels 1c and 1e
+We now plot panels 1c and 1e. First we load libraries for plotting and data manipulation.
+
+```{r plotting_libraries}
 
 library(ggplot2)
 library(reshape2)
 library(dplyr)
 library(ggpattern)
+```
 
-```{r plot_replicates}
 
-small_text_size <- 32
-large_text_size <-36
+```{r load_simulation_results}
+Then, we load the clustering results from the simulations above.
 
 df_1_group <- read.csv("one_group.csv", row.names = 1)
 df_1_group$num_groups <- NULL # drop unnecessary column
 
 df_3_groups <- read.csv("three_groups.csv", row.names = 1)
 df_3_groups$num_groups <- NULL # drop unnecessary column
+```
 
 
+We plot the results for the one group simulations.
+
+```{r plot_replicates_one_group}
 melted_df_1 <- melt(df_1_group) 
 
 df_summary_1_group <- melted_df_1 %>%
@@ -260,6 +266,10 @@ df_summary_1_group <- melted_df_1 %>%
             sd = sd(value))
 
 colnames(df_summary_1_group) <- c("method", "mean", "sd")
+
+
+small_text_size <- 32
+large_text_size <-36
 
 
 barplot_error_bars1 <- ggplot(df_summary_1_group) +
@@ -297,8 +307,9 @@ barplot_error_bars1 <- ggplot(df_summary_1_group) +
 
 
 
+We plot the results for the three groups simulations.
 
-
+```{r plot_replicates_three_groups}
 melted_df_3 <- melt(df_3_groups) 
 
 df_summary_3_groups <- melted_df_3 %>%
