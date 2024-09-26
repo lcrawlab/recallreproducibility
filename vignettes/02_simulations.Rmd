@@ -1,0 +1,344 @@
+---
+title: "2. Clustering Simulated Data (Figure 1)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{figure-1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+knitr::opts_chunk$set(warning = FALSE)
+
+
+knitr::opts_chunk$set(eval = FALSE)
+
+```
+
+
+
+
+
+
+
+```{r setup}
+suppressPackageStartupMessages({
+library(splatter)
+library(LaplacesDemon)
+library(callback)
+library(Seurat)
+library(scSHC)
+library(CHOIR)
+})
+```
+
+We write a function for simulating data and running each clustering method.
+
+```{r simulation_function}
+simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, shared_memory_max) {
+  set.seed(seed)
+  
+  cell_type_proportions <- c(rdirichlet(1, alpha = rep(4, num_groups)))
+
+  print("cell_type_proportions")
+  print(cell_type_proportions)
+  
+
+  sim.groups <- splatter::splatSimulate(group.prob = cell_type_proportions, method = "groups",
+                                        verbose = FALSE,
+                                        nGenes = num_genes,
+                                        batchCells = num_cells,
+                                        dropout.type = "experiment", 
+                                        de.prob = de_prob)
+  
+  seurat_obj <- Seurat::as.Seurat(sim.groups, counts = "counts", data = NULL)
+  seurat_obj <- SeuratObject::RenameAssays(object = seurat_obj, originalexp = 'RNA')
+  
+  if (num_groups == 1) {
+    seurat_obj@meta.data$Group <- 1
+  }
+  
+  seurat_obj <- NormalizeData(seurat_obj)
+  seurat_obj <- FindVariableFeatures(seurat_obj)
+  seurat_obj <- ScaleData(seurat_obj)
+
+  seurat_obj <- RunPCA(seurat_obj)
+  seurat_obj <- FindNeighbors(seurat_obj, dims = 1:10)
+  seurat_obj <- RunUMAP(seurat_obj, dims = 1:10)
+  
+  
+  print("running recall NB-copula")
+  recall_NB_copula_start_time <- Sys.time()
+  recall_NB_copula_memory <- peakRAM::peakRAM({
+    recall_nb_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB-copula", cores = cores, shared_memory_max = shared_memory_max)
+  })$Peak_RAM_Used_MiB
+  recall_NB_copula_end_time <- Sys.time()
+  
+  
+  print("running CHOIR")
+  CHOIR_start_time <- Sys.time()
+  CHOIR_memory <- peakRAM::peakRAM({
+  seurat_obj <- CHOIR(seurat_obj, 
+                      n_cores = cores,
+                      reduction = seurat_obj@reductions$pca@cell.embeddings[, 1:10],
+                      var_features = Seurat::VariableFeatures(seurat_obj))
+  })$Peak_RAM_Used_MiB
+  CHOIR_end_time <- Sys.time()
+  
+
+  print("running recall ZIP")
+  recall_ZIP_start_time <- Sys.time()
+  recall__ZIP_memory <- peakRAM::peakRAM({
+  recall_zip_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "ZIP", cores = cores, shared_memory_max = shared_memory_max)
+  })$Peak_RAM_Used_MiB
+  recall_ZIP_end_time <- Sys.time()
+  
+  print("running recall negative binomial")
+  recall_NB_start_time <- Sys.time()
+  recall_NB_memory <- peakRAM::peakRAM({
+  recall_nb_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB", cores = cores, shared_memory_max = shared_memory_max) #,resolution_start = 2.4)
+  })$Peak_RAM_Used_MiB
+  recall_NB_end_time <- Sys.time()
+    
+  
+  print("running recall Poisson-copula")
+  recall_Poisson_copula_start_time <- Sys.time()
+  recall_Poisson_copula_memory <- peakRAM::peakRAM({
+  recall_poisson_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Poisson-copula", cores = cores, shared_memory_max = shared_memory_max)
+  })$Peak_RAM_Used_MiB
+  recall_Poisson_copula_end_time <- Sys.time()
+  
+  #print("running recall Gaussian-copula")
+  #recall_gaussian_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Gaussian-copula", cores = cores)
+  
+  print("running recall countsplit")
+  recall_countsplit_start_time <- Sys.time()
+  recall_countsplit_memory <- peakRAM::peakRAM({
+  countsplit_seurat_obj <- FindClustersCountsplit(seurat_obj, cores = cores, shared_memory_max = shared_memory_max)
+  })$Peak_RAM_Used_MiB
+  recall_countsplit_end_time <- Sys.time()
+  
+  
+  print("running scSHC")
+  scSHC_start_time <- Sys.time()
+  scSHC_memory <- peakRAM::peakRAM({
+  scSHC_clusters <- scSHC(GetAssayData(seurat_obj,
+                                       assay = "RNA", layer = "counts")[Seurat::VariableFeatures(seurat_obj),],
+                          num_features = 1000,
+                          num_PCs = 10,
+                          cores = cores)[[1]]
+  })$Peak_RAM_Used_MiB
+  scSHC_end_time <- Sys.time()
+  
+  
+  print("storing cluster labels")
+  
+  seurat_obj[["recall_ZIP"]] <- recall_zip_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_NB"]] <- recall_nb_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_NB-copula"]] <- recall_nb_copula_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_Poisson-copula"]] <- recall_poisson_copula_seurat_obj@meta.data$callback_clusters
+  #seurat_obj[["recall_Gaussian-copula"]] <- recall_gaussian_copula_seurat_obj@meta.data$callback_clusters
+  
+  seurat_obj[["recall_countsplit"]] <- countsplit_seurat_obj@meta.data$callback_clusters
+  
+  
+  seurat_obj[['scSHC']] <- scSHC_clusters
+  seurat_obj[["CHOIR"]] <- seurat_obj@meta.data$CHOIR_clusters_0.05
+  
+  
+  print("logging timing and memory metrics")
+  recall_ZIP_time_taken <- difftime(recall_ZIP_end_time, recall_ZIP_start_time, units="mins")
+  recall_NB_time_taken <- difftime(recall_NB_end_time, recall_NB_start_time, units="mins")
+  recall_NB_copula_time_taken <- difftime(recall_NB_copula_end_time, recall_NB_copula_start_time, units="mins")
+  recall_Poisson_copula_time_taken <- difftime(recall_Poisson_copula_end_time, recall_Poisson_copula_start_time, units="mins")
+  recall_countsplit_time_taken <- difftime(recall_countsplit_end_time, recall_countsplit_start_time, units="mins")
+  scSHC_time_taken <- difftime(scSHC_end_time, scSHC_start_time, units="mins")
+  CHOIR_time_taken <- difftime(CHOIR_end_time, CHOIR_start_time, units="mins")
+  
+  print("logging timing and memory")
+  time <- c(recall_ZIP_time_taken,
+            recall_NB_time_taken,
+            recall_NB_copula_time_taken,
+            recall_Poisson_copula_time_taken,
+            recall_countsplit_time_taken,
+            scSHC_time_taken,
+            CHOIR_time_taken)
+  
+  method <- c("recall+ZIP", 
+              "recall+NB", 
+              "recall+NB-copula", 
+              "recall+Poisson-copula", 
+              "Recall+countsplit", 
+              "sc-SHC", 
+              "CHOIR")
+  
+  memory <- c(recall__ZIP_memory,
+              recall_NB_memory,
+              recall_NB_copula_memory,
+              recall_Poisson_copula_memory,
+              recall_countsplit_memory,
+              scSHC_memory,
+              CHOIR_memory)
+  
+  df <- data.frame(method, time, memory)
+  
+  print('timing memory df')
+  print(df)
+  
+  return(list(seurat_obj=seurat_obj, timing_memory_df=df))
+}
+```
+
+
+
+
+
+
+
+
+First, w set up the simulation paramters. This script was run with various parameter choices on an HPC system.
+```{r simulation_parameters}
+args = commandArgs(trailingOnly=TRUE)
+
+num_groups <- as.integer(args[1])
+num_cells <- as.integer(args[2])
+
+num_replicates <- 5
+num_genes <- 5000
+de_prob <- 0.10
+
+num_cores <- 6
+
+cluster_metrics_df  <- data.frame()
+timing_memory_df <- data.frame()
+
+shared_memory_max = 16000 * 1024^2
+```
+
+
+
+We run the specified simulations and store the clustering metrics from the results for each method.
+```{r run_simulations}
+for (replicate in 1:num_replicates) {
+  print("num groups")
+  print(num_groups)
+  
+  print("num cells")
+  print(num_cells)
+  print("replicate (and seed)")
+  print(replicate)
+  
+  seed <- replicate
+  
+  simulation_res <- simulation(num_groups, num_cells, num_genes, de_prob, seed, cores=num_cores, shared_memory_max=shared_memory_max)
+  
+  seurat_obj <- simulation_res$seurat_obj
+  timing_memory_df_replicate <- simulation_res$timing_memory_df
+  
+
+  # clustering metrics
+  print("recall zip metrics")
+  recall_ZIP_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                    "Group",
+                                                    "recall_ZIP",
+                                                    replicate,
+                                                    num_cells,
+                                                    num_groups)
+  
+  print("recall NB metrics")
+  recall_NB_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                        "Group",
+                                                        "recall_NB",
+                                                        replicate,
+                                                        num_cells,
+                                                        num_groups)
+  
+  print("recall NB-copula metrics")
+  recall_NB_copula_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                              "Group",
+                                                              "recall_NB-copula",
+                                                              replicate,
+                                                              num_cells,
+                                                              num_groups)
+  
+  print("recall Poisson-copula metrics")
+  recall_Poisson_copula_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                                   "Group",
+                                                                   "recall_Poisson-copula",
+                                                                   replicate,
+                                                                   num_cells,
+                                                                   num_groups)
+
+  print("recall countsplit metrics")
+  recall_countsplit_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                               "Group",
+                                                               "recall_countsplit",
+                                                               replicate,
+                                                               num_cells,
+                                                               num_groups)
+  
+  print("scSHC metrics")
+  
+  scSHC_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                 "Group",
+                                                 "scSHC",
+                                                 replicate,
+                                                 num_cells,
+                                                 num_groups)
+  
+  print("CHOIR metrics")
+  
+  CHOIR_metrics_df_row <- recallreproducibility::get_clustering_metrics(seurat_obj,
+                                                 "Group",
+                                                 "CHOIR",
+                                                 replicate,
+                                                 num_cells,
+                                                 num_groups)
+
+
+  print('making clustering metrics table')
+  cluster_metrics_df <- rbind(cluster_metrics_df,
+                              recall_ZIP_metrics_df_row,
+                              recall_NB_metrics_df_row,
+                              recall_NB_copula_metrics_df_row,
+                              recall_Poisson_copula_metrics_df_row,
+                              #recall_Gaussian_copula_metrics_df_row,
+                              recall_countsplit_metrics_df_row,
+                              scSHC_metrics_df_row,
+                              CHOIR_metrics_df_row)
+  
+  print('making timing/memory table')
+  timing_memory_df <- rbind(timing_memory_df,
+                            timing_memory_df_replicate)
+
+}
+```
+
+
+Finally, we save the results of these simulations
+```{r save_simulation_results}
+print("writing final results")
+
+metrics_csv_filename <- stringr::str_glue("clustering_metrics/simulations_num_groups_{num_groups}_num_cells_{num_cells}.csv")
+write.csv(cluster_metrics_df, metrics_csv_filename)
+
+timing_memory_csv_filename <- stringr::str_glue("timing_memory/simulations_num_groups_{num_groups}_num_cells_{num_cells}_timing_memory.csv")
+write.csv(timing_memory_df, timing_memory_csv_filename)
+```
+
+
+
+
+
+
+
+
+
+
+
+
