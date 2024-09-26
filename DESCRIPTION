@@ -1,12 +1,44 @@
 Package: recallreproducibility
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Reproducibility of recall manuscript
+Version: 1.0.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Alan", "DenAdel", , "alan_denadel@brown.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7985-6789"))
+Description: recall (calibRatEd Clustering with ArtificiaL variabLes): is a method for protecting
+ against over-clustering by controlling for the impact of double-dipping.
+ This package reproduces the figures found in the recall manuscript.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 3.5.0)
+Imports: 
+    Seurat,
+    SeuratObject,
+    splatter,
+    ggplot2,
+    ggpattern,
+    ggrepel,
+    patchwork,
+    grid,
+    gridExtra,
+    plyr,
+    dplyr,
+    stringr,
+    rlang,
+    aricode,
+    clevr,
+    clusteval,
+    magrittr,
+    recall,
+    clusteval
+Suggests: 
+    knitr,
+    rmarkdown
+Remotes:
+    clusteval=github::ramhiser/clusteval,
+    recall=github::lcrawlab/recall
+VignetteBuilder: knitr
 URL: https://lcrawlab.github.io/recallreproducibility/
