@@ -1,5 +1,5 @@
 ---
-title: "1. Clustering Simulated Data (Figure 1)"
+title: "1. Clustering Simple Simulated Data (Figure 1)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{figure-1}
@@ -160,6 +160,7 @@ ggplot2::ggsave("umap_grid.png", umap_grid, width = 2 * 1.5 * 2^12, height = 2 *
 ![](umap_grid.png){width=100%}
 
 
+# Replicates of the simple simulations
 
 
 We repeat this simulation 1000 times and save the results.
@@ -231,6 +232,8 @@ write.csv(df_1_group, "one_group.csv")
 write.csv(df_3_groups, "three_groups.csv")
 ```
 
+
+# Plot results of simulation replicates
 
 
 We now plot panels 1c and 1e. First we load libraries for plotting and data manipulation.
@@ -304,6 +307,7 @@ barplot_error_bars1 <- ggplot(df_summary_1_group) +
   scale_fill_manual(values = c("white", "red"), labels = c("recall", "Seurat")) + 
   ylim(0,7) + 
   guides(fill="none", pattern="none")
+```
 
 
 
@@ -318,7 +322,6 @@ df_summary_3_groups <- melted_df_3 %>%
             sd = sd(value))
 
 colnames(df_summary_3_groups) <- c("method", "mean", "sd")
-
 
 
 barplot_error_bars3 <- ggplot(df_summary_3_groups) +
@@ -353,10 +356,10 @@ barplot_error_bars3 <- ggplot(df_summary_3_groups) +
   scale_fill_manual(values = c("white", "red"), labels = c("recall", "Seurat")) + 
   ylim(0,7) + 
   guides(fill="none", pattern="none")
+```
 
-
-barplot_error_bars1 + barplot_error_bars3
-
+Finally, save the plots.
+```{r save_1c_1e}
 ggsave("fig1c.png", barplot_error_bars1, width = 1.2 * 1.2 * 1440, height = 1.3 * 1440, units = "px")
 ggsave("fig1e.png", barplot_error_bars3, width = 1.2 * 1.2 * 1440, height = 1.3 * 1440, units = "px")
 ```
