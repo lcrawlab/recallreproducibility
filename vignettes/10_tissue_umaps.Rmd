@@ -1,0 +1,159 @@
+---
+title: "6. Plotting Tabula Muris UMAPs (Supplemental Figures S17-S36)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tissue_umaps}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+knitr::opts_chunk$set(warning = FALSE)
+
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r setup}
+suppressPackageStartupMessages({
+library(recallreproducibility)
+
+library(Seurat)
+
+library(ggplot2)
+library(patchwork)
+library(grid)
+library(gridExtra)
+})
+```
+Define a function for plotting the UMAPs.
+
+```{r umap_funciton}
+get_umap_with_scace <- function(tissue, tissue_name) {
+  umap_fig <- one_umap(tissue, "cell_ontology_class", "Cell Ontology Class", add_legend=TRUE) + 
+    one_umap(tissue, "callback_idents", "recall", add_legend=TRUE) + 
+    one_umap(tissue, "scSHC_clusters", "sc-SHC", add_legend=TRUE) + 
+    one_umap(tissue, "CHOIR_clusters_0.05", "CHOIR", add_legend=TRUE) +
+    one_umap(tissue, "scace_cluster", "scAce", add_legend=TRUE) +
+
+    patchwork::plot_layout(widths = c(1, 1),
+                           heights = c(1,1, 1)) + 
+    plot_annotation(title = tissue_name,
+                    theme = theme(plot.title = element_text(size = 64, hjust = 0.5, vjust = 1.0)))
+
+  return(umap_fig)
+
+}
+```
+
+
+Get the clustering results from running `callback`, `sc-SHC`, and `CHOIR` and `scAce`.
+
+```{r get_data}
+tissue_seurat_files <- list.files(pattern = "cluster_results_seurat.rds")
+```
+
+Loop over the clustering results and plot all of the UMAP grids.
+```{r generate_umaps}
+for (tissue_rds_file in tissue_seurat_files) {
+  
+  tissue_name <- sub('cluster_results_seurat.rds', "", tissue_rds_file)
+  
+  print(tissue_name)
+  
+  tissue_seurat_obj <- readRDS(paste0("original_results/", tissue_rds_file))
+  scace_adata <- anndata::read_h5ad(paste0("scace_results/", tissue_name, ".h5ad"))
+  tissue_scace <- Seurat::CreateSeuratObject(counts = t(scace_adata$X), meta.data = scace_adata$obs)
+
+
+  tissue_seurat_obj@meta.data$scace_cluster <- tissue_scace@meta.data$scace_cluster  
+  if (tissue_name == "Heart") {
+    # clean up cell type labels for heart
+    tissue_seurat_obj@meta.data$cell_ontology_class[tissue_seurat_obj@meta.data$cell_ontology_class == ""] <- "cardiac neuron"
+  }
+  
+  if (tissue_name == "Fat") {
+    # clean up cell type labels for fat
+    tissue_seurat_obj@meta.data$cell_ontology_class[tissue_seurat_obj@meta.data$cell_ontology_class == ""] <- "unlabeled"
+  }
+  
+  if (tissue_name == "Lung") {
+    # clean up cell type labels for heart
+    tissue_seurat_obj@meta.data$cell_ontology_class[tissue_seurat_obj@meta.data$cell_ontology_class == ""] <- "unlabeled"
+  }
+  
+  # make legends fit better
+  legend_line_length <- 15
+  
+  if (tissue_name == "Lung") {
+    legend_line_length <- 22
+  }
+
+  # make some cell types multiple lines
+  tissue_seurat_obj@meta.data$cell_ontology_class <- stringr::str_wrap(tissue_seurat_obj@meta.data$cell_ontology_class, legend_line_length)
+
+  # remove NAs
+  tissue_seurat_obj <- subset(tissue_seurat_obj, subset = cell_ontology_class %in% levels(factor(tissue_seurat_obj@meta.data$cell_ontology_class)))
+
+
+  umap_fig <- get_umap_with_scace(tissue_seurat_obj, tissue_name)
+  
+  if (tissue_name == "Marrow") {
+    
+    legend_line_length <- 23
+    
+    tissue_seurat_obj@meta.data$cell_ontology_class <- stringr::str_wrap(tissue_seurat_obj@meta.data$cell_ontology_class, legend_line_length)
+    
+    layout <- "AAA###\nAAA###\nBBCCDD\nBBCCDD"
+
+    marrow_ontology <- one_umap(tissue_seurat_obj, "cell_ontology_class", "Cell Ontology Class", add_legend=TRUE) + guides(color=guide_legend(nrow=7))
+
+    marrow_recall <- one_umap(tissue_seurat_obj, "recall_idents", "recall", add_legend=TRUE) + guides(color=guide_legend(nrow=12))
+    marrow_scSHC <- one_umap(tissue_seurat_obj, "scSHC_clusters", "sc-SHC", add_legend=TRUE) + guides(color=guide_legend(nrow=12))
+    marrow_CHOIR <- one_umap(tissue_seurat_obj, "CHOIR_clusters_0.05", "CHOIR", add_legend=TRUE) + guides(color=guide_legend(nrow=12))
+    marrow_scAce <- one_umap(tissue_seurat_obj, "scace_cluster", "scAce", add_legend=TRUE) + guides(color=guide_legend(nrow=12))
+
+    umap_fig <- arrangeGrob(
+      marrow_ontology, marrow_recall, marrow_scSHC, marrow_CHOIR, marrow_scAce
+      #  widths = c(2, 1, 1),
+      top=textGrob("Marrow", gp=gpar(fontsize = 64, hjust = 0.5, vjust = 1.0)),
+      layout_matrix = rbind(c(1, 1),
+                            c(2, 3),
+                            c(4, 5))
+    )
+    
+  }
+  
+  ggsave(paste0(tissue_name, "_umap.png"), plot = umap_fig, height = 1.5 * 3 * 1440, width = 1.3 * 5 * 1440, units = "px")
+}
+```
+
+
+![](umap_grids/Aorta_umap.png){width=100%}
+![](umap_grids/Bladder_umap.png){width=100%}
+![](umap_grids/Brain_Myeloid_umap.png){width=100%}
+![](umap_grids/Brain_Non-Myeloid_umap.png){width=100%}
+
+![](umap_grids/Diaphragm_umap.png){width=100%}
+![](umap_grids/Fat_umap.png){width=100%}
+![](umap_grids/Heart_umap.png){width=100%}
+![](umap_grids/Kidney_umap.png){width=100%}
+
+![](umap_grids/Large_Intestine_umap.png){width=100%}
+![](umap_grids/Limb_Muscle_umap.png){width=100%}
+![](umap_grids/Liver_umap.png){width=100%}
+![](umap_grids/Lung_umap.png){width=100%}
+
+![](umap_grids/Mammary_Gland_umap.png){width=100%}
+![](umap_grids/Marrow_umap.png){width=100%}
+![](umap_grids/Pancreas_umap.png){width=100%}
+![](umap_grids/Skin_umap.png){width=100%}
+
+![](umap_grids/Spleen_umap.png){width=100%}
+![](umap_grids/Thymus_umap.png){width=100%}
+![](umap_grids/Tongue_umap.png){width=100%}
+![](umap_grids/Trachea_umap.png){width=100%}
