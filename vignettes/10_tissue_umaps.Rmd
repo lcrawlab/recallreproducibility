@@ -1,5 +1,5 @@
 ---
-title: "6. Plotting Tabula Muris UMAPs (Supplemental Figures S17-S36)"
+title: "10. Plotting Tabula Muris UMAPs (Supplemental Figures S17-S36)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{tissue_umaps}
