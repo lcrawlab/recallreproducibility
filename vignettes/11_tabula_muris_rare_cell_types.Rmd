@@ -279,7 +279,7 @@ Original Diaphgragm UMAP            |  Downsampled Diaphgragm UMAP              
 
 
 We plot the Limb muscle results.
-```{r plot_diaphgram}
+```{r plot_limb_muscle}
 limb_muscle <- readRDS("Limb_Musclecluster_results_seurat.rds")
 limb_muscle_downsampled <- downsample_cell_type(limb_muscle, "T cell", 5)
 
