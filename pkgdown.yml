@@ -18,7 +18,7 @@ articles:
   14_seurat_data_and_liver_timing: 14_seurat_data_and_liver_timing.html
   15_pbmc-timing: 15_pbmc-timing.html
   16_pbmc-timing-plotting: 16_pbmc-timing-plotting.html
-last_built: 2024-09-27T00:22Z
+last_built: 2024-09-27T00:25Z
 urls:
   reference: https://lcrawlab.github.io/recallreproducibility/reference
   article: https://lcrawlab.github.io/recallreproducibility/articles
