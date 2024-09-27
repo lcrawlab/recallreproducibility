@@ -1,4 +1,4 @@
-# recall (Calibrated Clustering with ArtificiaL Variables) Reproducibility <img src="man/figures/recall_logo.png" align="right" alt="" width="120"/>
+# recall (Calibrated Clustering with Artificial Variables) Reproducibility <img src="man/figures/recall_logo.png" align="right" alt="" width="120"/>
 
 
 ## Introduction
