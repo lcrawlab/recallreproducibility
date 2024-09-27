@@ -35,7 +35,7 @@ library(ClusterDE)
 
 
 
-```{r clusterDE_workflow}
+```{r clusterDE_workflow_function}
 clusterDE_workflow <- function(seurat_obj, cluster1, cluster2, cores) {
   set.seed(1)
   
@@ -82,7 +82,7 @@ clusterDE_workflow <- function(seurat_obj, cluster1, cluster2, cores) {
 }
 ```
 
-```{r countsplit_workflow}
+```{r countsplit_workflow_function}
 countsplit_workflow <- function(seurat_obj) {
   set.seed(1)
   
@@ -153,7 +153,7 @@ countsplit_workflow <- function(seurat_obj) {
 ```{r DE_comparison_scatterplots}
 DE_comparisons_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.2, 0.2)) {  
   louvain_default <- custom_scatter(tissue, "umap", group_by = "seurat_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2, label=FALSE) #+ Seurat::NoLegend()
-  louvain_callback <- custom_scatter(tissue, "umap", group_by = "callback_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) #+ Seurat::NoLegend() 
+  louvain_recall <- custom_scatter(tissue, "umap", group_by = "recall_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) #+ Seurat::NoLegend() 
   louvain_countsplit <- custom_scatter(tissue, "umap", group_by = "countsplit_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) #+ Seurat::NoLegend() 
   cell_ontology <- custom_scatter(tissue, "umap", group_by = "cell_ontology_class", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) + 
     ggplot2::theme(legend.position = legend_pos,
@@ -168,7 +168,7 @@ DE_comparisons_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.2, 
   
   
   umap_grid <- column_label_1 + column_label_2 + column_label_3 + column_label_4 +
-    cell_ontology + louvain_default + louvain_callback + louvain_countsplit + 
+    cell_ontology + louvain_default + louvain_recall + louvain_countsplit + 
     patchwork::plot_layout(widths = c(5, 5, 5, 5),
                            heights = c(1,3))
   
@@ -255,8 +255,8 @@ compare_markers_q_vals <- function(default_markers_a, default_markers_b, xlabel,
 
 
 ```{r compare_markers_venn_diagram}
-marker_gene_venn_diagram <- function(callback_marker_genes, countsplit_marker_genes, clusterDE_marker_genes) {
-  p <- ggVennDiagram(list("recall+ZIP"=callback_marker_genes,
+marker_gene_venn_diagram <- function(recall_marker_genes, countsplit_marker_genes, clusterDE_marker_genes) {
+  p <- ggVennDiagram(list("recall+ZIP"=recall_marker_genes,
                           "countsplit"=countsplit_marker_genes,
                           "clusterDE"=clusterDE_marker_genes),
                      label = "count") +
@@ -316,8 +316,8 @@ Get marker genes for recall and countsplit
 # for countsplit cluster 0 is "skeletal muscle satellite cell" and cluster 1 is "mesenchymal stem cell"
 countsplit_markers_0vs1 <- FindMarkers(limb_muscle_test, ident.1 = 0, ident.2 = 1, min.pct = 0, logfc.threshold = 0)
 
-# for callback cluster 0 is "skeletal muscle satellite cell" and cluster 1 is "mesenchymal stem cell"
-callback_markers_0vs1 <- FindMarkers(limb_muscle, ident.1 = 0, ident.2 = 1, group.by = "callback_idents", min.pct = 0, logfc.threshold = 0)
+# for recall cluster 0 is "skeletal muscle satellite cell" and cluster 1 is "mesenchymal stem cell"
+recall_markers_0vs1 <- FindMarkers(limb_muscle, ident.1 = 0, ident.2 = 1, group.by = "recall_idents", min.pct = 0, logfc.threshold = 0)
 ```
 
 
@@ -330,8 +330,8 @@ clusterDE_res <- clusterDE_workflow(limb_muscle, 1, 2, cores=1)
 
 Plot the p-value and q-value scatterplots.
 ```{r scatterplots}
-countsplit_vs_callback_markers_plot <- compare_markers_p_vals(countsplit_markers_0vs1,
-                                                              callback_markers_0vs1,
+countsplit_vs_recall_markers_plot <- compare_markers_p_vals(countsplit_markers_0vs1,
+                                                              recall_markers_0vs1,
                                                               xlabel = "countsplit -log P-values",
                                                               ylabel = "recall+ZIP -log P-values",
                                                               title = "Skeletal muscle satellite cell cluster vs\nMesenchymal stem cell cluster",
@@ -340,7 +340,7 @@ countsplit_vs_callback_markers_plot <- compare_markers_p_vals(countsplit_markers
 
 
 
-clusterDE_vs_callback_markers_plot <- compare_markers_q_vals(clusterDE_res$summaryTable, callback_markers_0vs1,
+clusterDE_vs_recall_markers_plot <- compare_markers_q_vals(clusterDE_res$summaryTable, recall_markers_0vs1,
                                                              "clusterDE -log q-values",
                                                              "recall+ZIP -log P-values",
                                                              "Skeletal muscle satellite cell cluster vs\nMesenchymal stem cell cluster",
@@ -348,20 +348,20 @@ clusterDE_vs_callback_markers_plot <- compare_markers_q_vals(clusterDE_res$summa
                                                              ymax = 400)
 
 
-ggsave("countsplit_vs_callback_markers_plot.png", countsplit_vs_callback_markers_plot, width = 12, height = 12, units = "in")
-ggsave("clusterDE_vs_callback_markers_plot.png", clusterDE_vs_callback_markers_plot, width = 12, height = 12, units = "in")
+ggsave("countsplit_vs_recall_markers_plot.png", countsplit_vs_recall_markers_plot, width = 12, height = 12, units = "in")
+ggsave("clusterDE_vs_recall_markers_plot.png", clusterDE_vs_recall_markers_plot, width = 12, height = 12, units = "in")
 ```
 
-![](countsplit_vs_callback_markers_plot.png){width=100%}
-![](clusterDE_vs_callback_markers_plot.png){width=100%}
+![](countsplit_vs_recall_markers_plot.png){width=100%}
+![](clusterDE_vs_recall_markers_plot.png){width=100%}
 
 
 Plot the Venn diagram
 ```{r plot_venn}
 countsplit_signficant <- countsplit_markers_0vs1[countsplit_markers_0vs1$p_val_adj < 0.05, ]
-callback_signficant <- callback_markers_0vs1[callback_markers_0vs1$p_val_adj < 0.05, ]
+recall_signficant <- recall_markers_0vs1[recall_markers_0vs1$p_val_adj < 0.05, ]
 
-marker_venn_diagram <- marker_gene_venn_diagram(rownames(callback_signficant), rownames(countsplit_signficant), clusterDE_res$DEgenes)
+marker_venn_diagram <- marker_gene_venn_diagram(rownames(recall_signficant), rownames(countsplit_signficant), clusterDE_res$DEgenes)
 
 ggsave("marker_venn_diagram.png", marker_venn_diagram)
 ```
@@ -371,28 +371,28 @@ ggsave("marker_venn_diagram.png", marker_venn_diagram)
 
 Finally, we plot the P-value comparison for recall and countsplit with recall clusters downsampled.
 ```{r downsampled}
-Idents(limb_muscle) <- limb_muscle@meta.data$callback_idents
+Idents(limb_muscle) <- limb_muscle@meta.data$recall_idents
 cluster_0_downsampled_indices <- WhichCells(limb_muscle, idents = c("0"), downsample = 271)
 cluster_1_downsampled_indices <- WhichCells(limb_muscle, idents = c("1"), downsample = 192)
 
-callback_downsampled_indices <- c(cluster_0_downsampled_indices, cluster_1_downsampled_indices)
+recall_downsampled_indices <- c(cluster_0_downsampled_indices, cluster_1_downsampled_indices)
 
-limb_muscle_downsampled <- limb_muscle[, callback_downsampled_indices]
+limb_muscle_downsampled <- limb_muscle[, recall_downsampled_indices]
 
-callback_downsampled_markers <- FindMarkers(limb_muscle_downsampled,ident.1 = 0, ident.2 = 1, min.pct = 0, logfc.threshold = 0)
+recall_downsampled_markers <- FindMarkers(limb_muscle_downsampled,ident.1 = 0, ident.2 = 1, min.pct = 0, logfc.threshold = 0)
 
-callback_downsampled_vs_counsplit_markers_plot <- compare_markers_p_vals(countsplit_markers_0vs1,
-                                                                         callback_downsampled_markers,
+recall_downsampled_vs_counsplit_markers_plot <- compare_markers_p_vals(countsplit_markers_0vs1,
+                                                                         recall_downsampled_markers,
                                                                          xlabel = "countsplit",
                                                                          ylabel = "recall+ZIP (downsampled cluster sizes)",
                                                                          title = "Skeletal muscle satellite cell cluster vs\nMesenchymal stem cell cluster",
                                                                          xmax = 200,
                                                                          ymax = 200)
 
-ggsave("callback_downsampled_vs_counsplit_markers_plot.png", callback_downsampled_vs_counsplit_markers_plot, width = 12, height = 12, units = "in")
+ggsave("recall_downsampled_vs_counsplit_markers_plot.png", recall_downsampled_vs_counsplit_markers_plot, width = 12, height = 12, units = "in")
 ```
 
-![](callback_downsampled_vs_counsplit_markers_plot.png){width=100%}
+![](recall_downsampled_vs_counsplit_markers_plot.png){width=100%}
 
 
 
