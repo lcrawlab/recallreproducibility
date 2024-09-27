@@ -32,8 +32,7 @@ library(ClusterDE)
 
 
 
-
-
+We begin by defining several functions. First, the clusterDE workflow.
 
 ```{r clusterDE_workflow_function}
 clusterDE_workflow <- function(seurat_obj, cluster1, cluster2, cores) {
@@ -81,6 +80,8 @@ clusterDE_workflow <- function(seurat_obj, cluster1, cluster2, cores) {
   return(res)
 }
 ```
+
+Then we write a function for the countsplit workflow.
 
 ```{r countsplit_workflow_function}
 countsplit_workflow <- function(seurat_obj) {
@@ -149,7 +150,7 @@ countsplit_workflow <- function(seurat_obj) {
 ```
 
 
-
+We write function for plotting the UMAPs.
 ```{r DE_comparison_scatterplots}
 DE_comparisons_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.2, 0.2)) {  
   louvain_default <- custom_scatter(tissue, "umap", group_by = "seurat_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2, label=FALSE) #+ Seurat::NoLegend()
@@ -177,7 +178,7 @@ DE_comparisons_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.2, 
 ```
 
 
-
+We write function for plotting the P-values.
 ```{r compare_markers_p_vals}
 compare_markers_p_vals <- function(default_markers_a, default_markers_b, xlabel, ylabel, title, xmax, ymax) {
   # sort genes alphabetically
@@ -213,6 +214,7 @@ compare_markers_p_vals <- function(default_markers_a, default_markers_b, xlabel,
 }
 ```
 
+We write function for plotting the q-values.
 ```{r compare_markers_q_vals}
 compare_markers_q_vals <- function(default_markers_a, default_markers_b, xlabel, ylabel, title, xmax, ymax) {
   # convert clusterDE results tibble to dataframe
@@ -254,6 +256,7 @@ compare_markers_q_vals <- function(default_markers_a, default_markers_b, xlabel,
 ```
 
 
+We write function for plotting the marker gene Venn diagram.
 ```{r compare_markers_venn_diagram}
 marker_gene_venn_diagram <- function(recall_marker_genes, countsplit_marker_genes, clusterDE_marker_genes) {
   p <- ggVennDiagram(list("recall+ZIP"=recall_marker_genes,
