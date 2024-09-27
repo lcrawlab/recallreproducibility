@@ -19,7 +19,6 @@ knitr::opts_chunk$set(eval = FALSE)
 
 ```{r setup}
 suppressPackageStartupMessages({
-library(callbackreproducibility)
 library(ggplot2)
 library(dplyr)
 library(plyr)
