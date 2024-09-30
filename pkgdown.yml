@@ -5,10 +5,7 @@ articles:
   01_figure1b-e: 01_figure1b-e.html
   02_simulations: 02_simulations.html
   03_figure1f_S2-8: 03_figure1f_S2-8.html
-  04_figure3: 04_figure3.html
-  04_rare_cell_type_simulations: 04_rare_cell_type_simulations.html
   06_cluster-tabula-muris: 06_cluster-tabula-muris.html
-  07_tabula_muris_clustering_metrics: 07_tabula_muris_clustering_metrics.html
   08_figure2_S11-16_S37: 08_figure2_S11-16_S37.html
   09_figure3: 09_figure3.html
   10_tissue_umaps: 10_tissue_umaps.html
@@ -18,7 +15,7 @@ articles:
   14_seurat_data_and_liver_timing: 14_seurat_data_and_liver_timing.html
   15_pbmc-timing: 15_pbmc-timing.html
   16_pbmc-timing-plotting: 16_pbmc-timing-plotting.html
-last_built: 2024-09-27T21:14Z
+last_built: 2024-09-30T21:44Z
 urls:
   reference: https://lcrawlab.github.io/recallreproducibility/reference
   article: https://lcrawlab.github.io/recallreproducibility/articles
