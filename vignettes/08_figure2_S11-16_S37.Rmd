@@ -1,0 +1,310 @@
+---
+title: "8. Tabula Muris Cluster Benchmarking (Figure 2, S11-S16, S37)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{figure-2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+
+clustering_metrics_facet_plot_with_additions <- function (cluster_metrics_df, statistic, y_label) 
+{
+  # remove underscores from tissue names
+  cluster_metrics_df$tissue_name <- gsub("_", "\n", cluster_metrics_df$tissue_name)
+  
+  # re-order factor levels
+  cluster_metrics_df$method <- factor(cluster_metrics_df$method, levels = c("callback",
+                                                                            "callback_NB",
+                                                                            "callback_Poisson-copula",
+                                                                            "callback_NB-copula",
+                                                                            "callback_countsplit",
+                                                                            "sc-SHC",
+                                                                            "CHOIR",
+                                                                            "scace_cluster"))
+  
+  
+  small_text_size <- 16
+  large_text_size <- 22
+  
+  bar_plot <- ggplot2::ggplot(cluster_metrics_df, ggplot2::aes(x = method, 
+                                                               y = !!rlang::sym(statistic),
+                                                               fill = method,
+                                                               #label=sprintf("%0.3f", round(!!rlang::sym(statistic), digits = 3)))) + 
+                                                               label=sprintf("%0.2f", round(!!rlang::sym(statistic), digits = 2)))) + 
+    ggplot2::geom_bar(
+      stat = "identity", 
+      position = "dodge",
+      color = "black",
+      alpha = 0.7) + 
+    ggplot2::facet_wrap(~tissue_name, ncol = 4) + 
+    ggplot2::scale_y_continuous(breaks=c(0, 0.5, 1.00), limits = c(-0.05, 1.1)) +
+    ggplot2::xlab("Tabula Muris Tissues") +
+    ggplot2::ylab(y_label) + 
+    ggplot2::ggtitle(y_label) + 
+    ggplot2::labs(fill = "Method") + 
+    #ggplot2::scale_fill_brewer(palette = "Set1", labels = c("callback", "sc-SHC", "CHOIR")) + 
+    ggplot2::scale_fill_manual(values = c("red", "darkmagenta", "darkgreen", "deepskyblue2", "darkorange1", "grey", "black", "tan"),
+                               labels = c("recall+ZIP", "recall+NB", "recall+Poisson-copula", "recall+NB-copula", "recall+countsplit", "sc-SHC", "CHOIR", "scACE")) + 
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), 
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_text(size = small_text_size),
+                   axis.title = ggplot2::element_text(size = large_text_size),
+                   strip.text = ggplot2::element_text(size = small_text_size), 
+                   legend.text = ggplot2::element_text(size = small_text_size, family = "Courier"),
+                   legend.title = ggplot2::element_text(size = small_text_size),
+                   plot.title = ggplot2::element_text(size = large_text_size, hjust = 0.5),
+                   legend.position="bottom") + 
+    ggplot2::geom_text(vjust = -0.2)
+  
+  return(bar_plot)
+}
+
+
+
+
+clustering_metrics_facet_plot_for_figure2 <- function (cluster_metrics_df, statistic, y_label) 
+{
+  # remove underscores from tissue names
+  cluster_metrics_df$tissue_name <- gsub("_", "\n", cluster_metrics_df$tissue_name)
+  
+  # re-order factor levels
+  cluster_metrics_df$method <- factor(cluster_metrics_df$method, levels = c("callback",
+                                                                            "callback_NB",
+                                                                            "callback_Poisson-copula",
+                                                                            "callback_NB-copula",
+                                                                            "callback_countsplit",
+                                                                            "sc-SHC",
+                                                                            "CHOIR",
+                                                                            "scace_cluster"))
+  
+  cluster_metrics_df <- subset(cluster_metrics_df, method %in% c("callback", "sc-SHC", "CHOIR", "scace_cluster"))
+  
+  
+  
+  
+  small_text_size <- 16
+  large_text_size <- 22
+  
+  bar_plot <- ggplot2::ggplot(cluster_metrics_df, ggplot2::aes(x = method, 
+                                                               y = !!rlang::sym(statistic),
+                                                               fill = method,
+                                                               label=sprintf("%0.3f", round(!!rlang::sym(statistic), digits = 3)))) + 
+                                                               #label=sprintf("%0.2f", round(!!rlang::sym(statistic), digits = 2)))) + 
+    ggplot2::geom_bar(
+      stat = "identity", 
+      position = "dodge",
+      color = "black",
+      alpha = 0.7) + 
+    ggplot2::facet_wrap(~tissue_name, ncol = 4) + 
+    ggplot2::scale_y_continuous(breaks=c(0, 0.5, 1.00), limits = c(-0.05, 1.1)) +
+    ggplot2::xlab("Tabula Muris Tissues") +
+    ggplot2::ylab(y_label) + 
+    ggplot2::ggtitle(y_label) + 
+    ggplot2::labs(fill = "Method") + 
+    #ggplot2::scale_fill_brewer(palette = "Set1", labels = c("callback", "sc-SHC", "CHOIR")) + 
+    ggplot2::scale_fill_manual(values = c("red", "grey", "black", "tan"), labels = c("recall+ZIP", "sc-SHC", "CHOIR", "scAce")) + 
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), 
+                   axis.text.x = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_text(size = small_text_size),
+                   axis.title = ggplot2::element_text(size = large_text_size),
+                   strip.text = ggplot2::element_text(size = small_text_size), 
+                   legend.text = ggplot2::element_text(size = small_text_size, family = "Courier"),
+                   legend.title = ggplot2::element_text(size = small_text_size),
+                   plot.title = ggplot2::element_text(size = large_text_size, hjust = 0.5),
+                   legend.position="bottom") + 
+    ggplot2::geom_text(vjust = -0.2)
+  
+  return(bar_plot)
+}
+
+
+library(ggplot2)
+setwd("/Users/alandenadel/Desktop/callback_review_scripts/tabula_muris_additions")
+
+cluster_metrics_df <- read.csv("cluster_metrics_df.csv", row.names = 1)
+
+cluster_metrics_copula <- read.csv("tabula_muris_copula_additional_clustering_metrics.csv", row.names = 1)
+# one column name had a mismatch
+names(cluster_metrics_df)[names(cluster_metrics_df) == 'ari'] <- 'ari_results'
+cluster_metrics_df <- rbind(cluster_metrics_df, cluster_metrics_copula)
+
+
+bar_plot_width <- 2 * 1440
+bar_plot_height <- 2.4 * 1440
+
+vmeasure_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "v_measure_results", "V-measure")
+vmeasure_plot_fig2 <- clustering_metrics_facet_plot_for_figure2(cluster_metrics_df, "v_measure_results", "V-measure")
+ggsave("vmeasure_plot.png", vmeasure_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+ggsave("fig2_vmeasure_plot.png", vmeasure_plot_fig2, width = 2 * 1440, height = bar_plot_height, units = 'px')
+
+ari_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "ari_results", "ARI")
+ari_plot_fig2 <- clustering_metrics_facet_plot_for_figure2(cluster_metrics_df, "ari_results", "ARI")
+ggsave("ari_plot.png", ari_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+ggsave("fig2_ari_plot.png", ari_plot_fig2, width = bar_plot_width, height = bar_plot_height, units = 'px')
+
+fm_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "fowlkes_mallows_results", "Fowlkes-Mallows Index")
+ggsave("fm_plot.png", fm_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+
+homogeneity_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "homogeneity_results", "Homogeneity") 
+ggsave("homogeneity_plot.png", homogeneity_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+
+completeness_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "completeness_results", "Completeness") 
+ggsave("completeness_plot.png", completeness_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+
+jaccard_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "jaccard_results", "Jaccard Index")
+ggsave("jaccard_plot.png", jaccard_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+
+
+
+
+
+
+# plot the timing data and rename callback to recall
+
+tissue_timing_df <- read.csv("tissue_timing_df.csv", row.names = 1)
+
+scAce_timing_df <- read.csv("scAce_timing.csv", row.names = 1)
+
+tissue_timing_df <- rbind(tissue_timing_df, scAce_timing_df)
+
+
+# order factor levels
+tissue_timing_df$method <- factor(tissue_timing_df$method, levels=c("callback", "sc-SHC", "CHOIR", "scAce"))
+
+# remove underscores from tissue names
+tissue_timing_df$tissue <- gsub("_", "\n", tissue_timing_df$tissue)
+
+small_text_size <- 16
+large_text_size <- 22
+
+p <- ggplot2::ggplot(tissue_timing_df, ggplot2::aes(x=method, y=time, fill=method, label=sprintf("%0.1f", round(time, digits = 1)))) +
+  ggplot2::geom_bar(stat = "identity", alpha = 0.7, colour = 'black') + 
+  ggplot2::facet_wrap(~tissue, nrow = 2) +
+  ggplot2::xlab("Tabula Muris Tissues") + 
+  ggplot2::ylab("Time Taken (minutes)") +
+  ggplot2::labs(fill = "Method") + 
+  ggplot2::ylim(c(0,18)) +
+  ggplot2::scale_fill_manual(values = c("red", "grey", "black", "tan"), labels = c("recall+ZIP", "sc-SHC", "CHOIR", "scAce")) + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.ticks.x = ggplot2::element_blank(), 
+                 axis.text.x = ggplot2::element_blank(),
+                 axis.text = ggplot2::element_text(size = small_text_size),
+                 axis.title = ggplot2::element_text(size = large_text_size),
+                 strip.text = ggplot2::element_text(size = small_text_size), 
+                 legend.text = ggplot2::element_text(size = small_text_size, family = "Courier"),
+                 legend.title = ggplot2::element_text(size = small_text_size),
+                 legend.position = "bottom") + 
+  geom_text(vjust = -0.2)
+
+ggsave("fig2_tabula_muris_timing.png", p, width = 4 * 1440, height = 4 * 460, units = "px")
+
+
+
+
+# plot UMAPs for two tissues
+
+diaphragm <- readRDS(file = "Diaphragmcluster_results_seurat.rds")
+limb_muscle <- readRDS(file = "Limb_Musclecluster_results_seurat.rds")
+
+diagphragm_scace <- anndata::read_h5ad("scace_output/Diaphragm.h5ad")
+diagphragm_scace <- Seurat::CreateSeuratObject(counts = t(diagphragm_scace$X), meta.data = diagphragm_scace$obs)
+
+limb_muscle_scace <- anndata::read_h5ad("scace_output/Limb_Muscle.h5ad")
+limb_muscle_scace <- Seurat::CreateSeuratObject(counts = t(limb_muscle_scace$X), meta.data = limb_muscle_scace$obs)
+
+# add scAce idents to Seurat objs
+diaphragm@meta.data$scAce_idents <- diagphragm_scace@meta.data$scace_cluster
+limb_muscle@meta.data$scAce_idents <- limb_muscle_scace@meta.data$scace_cluster
+
+# remove NAs
+limb_muscle <- subset(limb_muscle, subset = cell_ontology_class %in% levels(factor(limb_muscle@meta.data$cell_ontology_class)))
+diaphragm <- subset(diaphragm, subset = cell_ontology_class %in% levels(factor(diaphragm@meta.data$cell_ontology_class)))
+
+# clean up cell type labels for limb_muscle
+#limb_muscle@meta.data$cell_ontology_class[limb_muscle@meta.data$cell_ontology_class == ""] <- "cardiac neuron"
+#limb_muscle@meta.data$cell_ontology_class <- trimws(limb_muscle@meta.data$cell_ontology_class, whitespace = " cell")
+
+# shorten cell type labels for diaphragm
+#diaphragm@meta.data$cell_ontology_class <- trimws(diaphragm@meta.data$cell_ontology_class, whitespace = " cell")
+
+# sort levels by size of group (limb_muscle)
+limb_muscle@meta.data$cell_ontology_class <- as.factor(limb_muscle@meta.data$cell_ontology_class)
+sorted_limb_muscle_clusters <- names(sort(summary(as.factor(na.omit(limb_muscle@meta.data$cell_ontology_class))), decreasing = TRUE))
+limb_muscle@meta.data$cell_ontology_class <- factor(limb_muscle@meta.data$cell_ontology_class, levels = sorted_limb_muscle_clusters)
+
+# sort levels by size of group (diaphragm)
+diaphragm@meta.data$cell_ontology_class <- as.factor(diaphragm@meta.data$cell_ontology_class)
+sorted_diaphragm_clusters <- names(sort(summary(as.factor(na.omit(diaphragm@meta.data$cell_ontology_class))), decreasing = TRUE))
+diaphragm@meta.data$cell_ontology_class <- factor(diaphragm@meta.data$cell_ontology_class, levels = sorted_diaphragm_clusters)
+
+
+library(callbackreproducibility)
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(grid)
+
+y_limits <- c(-30, 12)
+x_limits <- c(-20, 20)
+legend_location <- c(0.1, 0.2)
+
+
+tissue <- limb_muscle
+limb_muscle_curated_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "cell_ontology_class", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  theme(legend.position = legend_location) + guides(color=guide_legend(ncol=2)) + 
+  xlim(x_limits) + ylim(y_limits) + 
+  scale_colour_discrete(labels = function(x) stringr::str_wrap(x, width = 15))
+
+limb_muscle_default_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "seurat_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+limb_muscle_callback_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "callback_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+limb_muscle_scSHC_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "scSHC_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+limb_muscle_CHOIR_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "CHOIR_clusters_0.05", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+limb_muscle_scAce_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "scAce_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+
+tissue <- diaphragm
+diaphragm_curated_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "cell_ontology_class", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  theme(legend.position = legend_location) + 
+  guides(color=guide_legend(ncol=2)) + 
+  xlim(x_limits) + ylim(y_limits) +
+  scale_colour_discrete(labels = function(x) stringr::str_wrap(x, width = 15))
+
+diaphragm_default_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "seurat_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+diaphragm_callback_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "callback_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+diaphragm_scSHC_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "scSHC_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) + 
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+diaphragm_CHOIR_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "CHOIR_clusters_0.05", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+diaphragm_scAce_scatter <- custom_scatter(tissue, reduction = "umap", group_by = "scAce_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 4) +
+  NoLegend() + xlim(x_limits) + ylim(y_limits)
+
+
+row_label_1 <- wrap_elements(panel = textGrob('Diaphragm', gp = gpar(fontsize = 64), rot = 90))
+row_label_2 <- wrap_elements(panel = textGrob('Limb Muscle', gp = gpar(fontsize = 64), rot = 90))
+
+column_label_1 <- wrap_elements(panel = textGrob('Curated Labels', gp = gpar(fontsize = 64)))
+column_label_2 <- wrap_elements(panel = textGrob('recall+ZIP', gp = gpar(fontsize = 64, fontfamily = "Courier")))
+column_label_3 <- wrap_elements(panel = textGrob('sc-SHC', gp = gpar(fontsize = 64, fontfamily = "Courier")))
+column_label_4 <- wrap_elements(panel = textGrob('CHOIR', gp = gpar(fontsize = 64, fontfamily = "Courier")))
+column_label_5 <- wrap_elements(panel = textGrob('scAce', gp = gpar(fontsize = 64, fontfamily = "Courier")))
+
+patchwork_grid <- plot_spacer() + column_label_1 + column_label_2 + column_label_3 + column_label_4 + column_label_5 +
+  row_label_1 + diaphragm_curated_scatter + diaphragm_callback_scatter + diaphragm_scSHC_scatter + diaphragm_CHOIR_scatter + diaphragm_scAce_scatter +
+  plot_spacer() + column_label_1 + column_label_2 + column_label_3 + column_label_4 + column_label_5 +
+  row_label_2 + limb_muscle_curated_scatter + limb_muscle_callback_scatter + limb_muscle_scSHC_scatter + limb_muscle_CHOIR_scatter + limb_muscle_scAce_scatter +
+  plot_layout(widths = c(1, 5, 5, 5, 5, 5),
+              heights = c(1,3,1,3))
+
+
+ggsave("fig2_umap_grid.png", patchwork_grid, width = 1.8 * 2^13, height = 0.8 * 2^13, units = "px")
