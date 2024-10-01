@@ -38,15 +38,16 @@
     <li><a class="dropdown-item" href="../articles/03_figure1f_S2-8.html">UNKNOWN TITLE</a></li>
     <li><a class="dropdown-item" href="../articles/04_figureS9-10.html">4. Rare Cell Type Simulations (Supplemental Fiures S9-S10)</a></li>
     <li><a class="dropdown-item" href="../articles/05_cluster-tabula-muris.html">5. Clustering Tabula Muris Tissues</a></li>
-    <li><a class="dropdown-item" href="../articles/06_figure2_S11-16_S37.html">6. Tabula Muris Cluster Benchmarking (Figure 2, S11-S16, S37)</a></li>
-    <li><a class="dropdown-item" href="../articles/07_figure3.html">7. Figure 3</a></li>
-    <li><a class="dropdown-item" href="../articles/08_tissue_umaps.html">8. Plotting Tabula Muris UMAPs (Supplemental Figures S17-S36)</a></li>
-    <li><a class="dropdown-item" href="../articles/09_tabula_muris_rare_cell_types.html">9. Marker Gene Method Comparison (Supplemental Figure S38)</a></li>
-    <li><a class="dropdown-item" href="../articles/10_S39_DE_comparison.html">10. Marker Gene Method Comparison (Supplemental Figure S39)</a></li>
-    <li><a class="dropdown-item" href="../articles/11_multi-dataset-timing.html">11. Benchmarking Runtime and Peak Memory Usage on Multiple Datasets</a></li>
-    <li><a class="dropdown-item" href="../articles/12_seurat_data_and_liver_timing.html">12. Plotting Runtime and Peak Memory Usage for Multiple Tissues (Supplemental Figures S26 and S27)</a></li>
-    <li><a class="dropdown-item" href="../articles/13_pbmc-timing.html">13. Benchmarking Runtime and Peak Memory Usage on PBMC Subsets</a></li>
-    <li><a class="dropdown-item" href="../articles/14_pbmc-timing-plotting.html">14. Plotting Runtime and Peak Memory Usage on PBMC Subsets (Supplemental Figures S42 and S43)</a></li>
+    <li><a class="dropdown-item" href="../articles/06_cluster-tabula-muris_additional.html">6. Clustering Tabula Muris Tissues With Additional Methods</a></li>
+    <li><a class="dropdown-item" href="../articles/07_figure2_S11-16_S37.html">6. Tabula Muris Cluster Benchmarking (Figure 2, S11-S16, S37)</a></li>
+    <li><a class="dropdown-item" href="../articles/08_figure3.html">7. Figure 3</a></li>
+    <li><a class="dropdown-item" href="../articles/09_tissue_umaps.html">8. Plotting Tabula Muris UMAPs (Supplemental Figures S17-S36)</a></li>
+    <li><a class="dropdown-item" href="../articles/10_tabula_muris_rare_cell_types.html">9. Marker Gene Method Comparison (Supplemental Figure S38)</a></li>
+    <li><a class="dropdown-item" href="../articles/11_S39_DE_comparison.html">10. Marker Gene Method Comparison (Supplemental Figure S39)</a></li>
+    <li><a class="dropdown-item" href="../articles/12_multi-dataset-timing.html">11. Benchmarking Runtime and Peak Memory Usage on Multiple Datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/13_seurat_data_and_liver_timing.html">12. Plotting Runtime and Peak Memory Usage for Multiple Tissues (Supplemental Figures S26 and S27)</a></li>
+    <li><a class="dropdown-item" href="../articles/14_pbmc-timing.html">13. Benchmarking Runtime and Peak Memory Usage on PBMC Subsets</a></li>
+    <li><a class="dropdown-item" href="../articles/15_pbmc-timing-plotting.html">14. Plotting Runtime and Peak Memory Usage on PBMC Subsets (Supplemental Figures S42 and S43)</a></li>
   </ul>
 </li>
       </ul>
@@ -76,7 +77,117 @@
 
     
     
-
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">callbackreproducibility</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">callback</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scSHC</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CHOIR</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123456</span><span class="op">)</span></span></code></pre></div>
+<p>The dataset used here for benchmarking can be found on <a href="https://figshare.com/articles/dataset/Single-cell_RNA-seq_data_from_Smart-seq2_sequencing_of_FACS_sorted_cells/5715040" class="external-link">Figshare</a>.
+The key files are <code>annotations_facs.csv</code> which has the Cell
+Ontology Class labels that we are using as a gold standard and
+<code>FACS.zip</code> which contains CSV files containing the counts
+matrix for each tissue.</p>
+<p>First, we set up a function for loading the Tabula Muris tissue data.
+Note that the data folders will need to point to where the data are
+located after downloading it from Figshare.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_folder</span> <span class="op">&lt;-</span> <span class="st">"tabula_muris/data/5829687/"</span>        <span class="co"># the directory containing annotations_facs.csv</span></span>
+<span><span class="va">tissue_folder</span> <span class="op">&lt;-</span> <span class="st">"tabula_muris/data/5829687/FACS/"</span> <span class="co"># the directory containing the files in FACS.zip</span></span>
+<span></span>
+<span><span class="va">read_tabula_muris_data</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">file</span>, row.names <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/CreateSeuratObject.html" class="external-link">CreateSeuratObject</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">data</span>, min.features <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
+<span>  <span class="va">seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">seurat_obj</span>, subset <span class="op">=</span> <span class="va">nCount_RNA</span> <span class="op">&gt;</span> <span class="fl">50000</span><span class="op">)</span></span>
+<span>  </span>
+<span>  </span>
+<span>  <span class="va">annotations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">data_folder</span>, <span class="st">'annotations_facs.csv'</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">annotations</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">annotations</span><span class="op">$</span><span class="va">cell</span></span>
+<span>  </span>
+<span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"cell_ontology_class"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">annotations</span><span class="op">[</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/Cells.html" class="external-link">Cells</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span>,<span class="op">]</span><span class="op">$</span><span class="va">cell_ontology_class</span></span>
+<span>  </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">seurat_obj</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Then, we loop over each tissue and cluster using
+<code>callback</code>, <code>sc-SHC</code>, and <code>CHOIR</code> and
+save the resulting <code>Seurat</code> objects for each tissue
+c(ontaining the cluster labels for each method) to RDS files.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tissue_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">tissue_folder</span>, pattern <span class="op">=</span> <span class="st">"csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cores</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
+<span><span class="va">num_PCs</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span></span>
+<span><span class="va">timing_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">tissue_csv</span> <span class="kw">in</span> <span class="va">tissue_files</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">tissue_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">tissue_csv</span>, <span class="st">"-counts.csv"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Processing:"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">tissue_name</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Loading tissue"</span><span class="op">)</span></span>
+<span>  <span class="va">tissue</span> <span class="op">&lt;-</span> <span class="fu">read_tabula_muris_data</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tissue_folder</span>, <span class="va">tissue_csv</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running initial seurat workflow"</span><span class="op">)</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
+<span>  <span class="va">tissue</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://lcrawlab.github.io/recall/reference/seurat_workflow.html" class="external-link">seurat_workflow</a></span><span class="op">(</span><span class="va">tissue</span>, num_variable_features <span class="op">=</span> <span class="va">p</span>, algorithm<span class="op">=</span><span class="st">"louvain"</span>, resolution_param <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running callback"</span><span class="op">)</span></span>
+<span>  <span class="va">callback_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">callback_results_obj</span> <span class="op">&lt;-</span> <span class="fu">FindClustersCallback</span><span class="op">(</span><span class="va">tissue</span>, cores<span class="op">=</span><span class="va">cores</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">num_PCs</span><span class="op">)</span></span>
+<span>  <span class="va">callback_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running scSHC"</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_clusters</span> <span class="op">&lt;-</span> <span class="fu">scSHC</span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">tissue</span>,</span>
+<span>                                       assay <span class="op">=</span> <span class="st">"RNA"</span>, layer <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span><span class="op">[</span><span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span>,<span class="op">]</span>,</span>
+<span>                                       num_features <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>                                       num_PCs <span class="op">=</span> <span class="va">num_PCs</span>,</span>
+<span>                                       cores <span class="op">=</span> <span class="va">cores</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Running CHOIR"</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">tissue</span> <span class="op">&lt;-</span> <span class="fu">CHOIR</span><span class="op">(</span><span class="va">tissue</span>, </span>
+<span>                  n_cores <span class="op">=</span> <span class="va">cores</span>,</span>
+<span>                  reduction <span class="op">=</span> <span class="va">tissue</span><span class="op">@</span><span class="va">reductions</span><span class="op">$</span><span class="va">pca</span><span class="op">@</span><span class="va">cell.embeddings</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="va">num_PCs</span><span class="op">]</span>,</span>
+<span>                  var_features <span class="op">=</span> <span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span><span class="va">tissue</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">tissue</span><span class="op">[[</span><span class="st">"CHOIR_clusters"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">tissue</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">CHOIR_clusters_0.05</span></span>
+<span>  <span class="va">tissue</span><span class="op">[[</span><span class="st">"callback_idents"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/Idents.html" class="external-link">Idents</a></span><span class="op">(</span><span class="va">callback_results_obj</span><span class="op">)</span></span>
+<span>  <span class="va">tissue</span><span class="op">[[</span><span class="st">'scSHC_clusters'</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">scSHC_clusters</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Saving result to rds file"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">tissue</span>, file <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">tissue_name</span>, <span class="st">"cluster_results_seurat.rds"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">callback_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">callback_end_time</span>, <span class="va">callback_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">scSHC_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">scSHC_end_time</span>, <span class="va">scSHC_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span>  <span class="va">CHOIR_time_taken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/difftime.html" class="external-link">difftime</a></span><span class="op">(</span><span class="va">CHOIR_end_time</span>, <span class="va">CHOIR_start_time</span>, units<span class="op">=</span><span class="st">"mins"</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">tissue</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tissue_name</span>, <span class="va">tissue_name</span>, <span class="va">tissue_name</span><span class="op">)</span></span>
+<span>  <span class="va">method</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"callback"</span>, <span class="st">"sc-SHC"</span>, <span class="st">"CHOIR"</span><span class="op">)</span></span>
+<span>  <span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">callback_time_taken</span>, <span class="va">scSHC_time_taken</span>, <span class="va">CHOIR_time_taken</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">timing_df_new_row</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">tissue</span>, <span class="va">method</span>, <span class="va">time</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">timing_df_new_row</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">timing_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">timing_df</span>, <span class="va">timing_df_new_row</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Finally, we save the runtime data.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">timing_df</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">timing_df</span>, <span class="st">"tissue_timing_df.csv"</span><span class="op">)</span></span></code></pre></div>
   </main>
 </div>
 
