@@ -1,8 +1,0 @@
----
-title: "7. Figure 3"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{pbmc_timing}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----

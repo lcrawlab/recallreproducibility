@@ -1,0 +1,131 @@
+---
+title: "6. Clustering Tabula Muris Tissues With Additional Methods"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cluster-tabula-muris}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(Seurat)
+  library(ggplot2)
+  
+  library(callback)
+})
+
+set.seed(123456)
+```
+
+
+
+
+
+
+
+First, we load the Tabula Muris tissue data and set up our parameters.
+
+```{r parameters_setup}
+
+tissue_files <- list.files(".", pattern = "cluster_results_seurat.rds")
+
+cores <- 6
+num_PCs <- 10
+
+timing_df <- data.frame()
+```
+
+
+Then, we loop over each tissue and cluster using the various `recall` methods and `countsplit`  and save the resulting `Seurat` objects for each tissue c(ontaining the cluster labels for each method) to RDS files.
+```{r cluster_data}
+
+for (tissue_file in tissue_files) {
+  tissue_name <- unlist(strsplit(tissue_file, "_results_seurat.rds"))[1]
+  
+  print("Processing:")
+  print(tissue_name)
+  
+  print("Loading tissue")
+  seurat_obj <- readRDS(tissue_file) 
+  
+  print("Running initial seurat workflow")
+  p <- 1000
+  #tissue <- seurat_workflow(tissue, num_variable_features = p, algorithm="louvain", resolution_param = 0.8)
+  
+  print("running callback negative binomial")
+  callback_NB_start_time <- Sys.time()
+  callback_nb_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB", cores = cores) #,resolution_start = 2.4)
+  callback_NB_end_time <- Sys.time()
+  
+  print("running callback NB-copula")
+  callback_NB_copula_start_time <- Sys.time()
+  callback_nb_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB-copula", cores = cores)
+  callback_NB_copula_end_time <- Sys.time()
+  
+  print("running callback Poisson-copula")
+  callback_Poisson_copula_start_time <- Sys.time()
+  callback_poisson_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Poisson-copula", cores = cores)
+  callback_Poisson_copula_end_time <- Sys.time()
+  
+  #print("running callback Gaussian-copula")
+  #callback_gaussian_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Gaussian-copula", cores = cores)
+  
+  print("running callback countsplit")
+  callback_countsplit_start_time <- Sys.time()
+  countsplit_seurat_obj <- callback::FindClustersCountsplit(seurat_obj, cores = cores)
+  callback_countsplit_end_time <- Sys.time()
+  
+  print("storing cluster labels")
+  
+  seurat_obj[["callback_NB"]] <- callback_nb_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["callback_NB-copula"]] <- callback_nb_copula_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["callback_Poisson-copula"]] <- callback_poisson_copula_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["callback_countsplit"]] <- countsplit_seurat_obj@meta.data$callback_clusters
+  
+  
+
+  print("Saving result to rds file")
+  saveRDS(seurat_obj, file =  paste0("new_clustering_output/", tissue_name, "_copula_clustering_results.rds" ))
+  
+  # todo time taken for each of the new/copula methods
+  callback_NB_time_taken <- difftime(callback_NB_end_time, callback_NB_start_time, units="mins")
+  callback_NB_copula_time_taken <- difftime(callback_NB_copula_end_time, callback_NB_copula_start_time, units="mins")
+  callback_Poisson_copula_time_taken <- difftime(callback_Poisson_copula_end_time, callback_Poisson_copula_start_time, units="mins")
+  callback_countsplit_time_taken <- difftime(callback_countsplit_end_time, callback_countsplit_start_time, units="mins")
+
+  tissue <- c(tissue_name, tissue_name, tissue_name, tissue_name)
+  method <- c("callback_NB", "callback_NB-copula", "callback_Poisson-copula", "callback_countsplit")
+  time <- c(callback_NB_time_taken, callback_NB_copula_time_taken, callback_Poisson_copula_time_taken, callback_countsplit_time_taken)
+  
+  timing_df_new_row <- data.frame(tissue, method, time)
+  
+  print(timing_df_new_row)
+  
+  timing_df <- rbind(timing_df, timing_df_new_row)
+}
+```
+
+
+
+Finally, we save the runtime data.
+```{r save_timing_df}
+print("final timing df")
+print(timing_df)
+write.csv(timing_df, "additional_tissue_timing_df.csv")
+```
+
+
+
+
+
+
