@@ -128,5 +128,5 @@ for (tissue_file in tissue_files) {
 ```
 
 Finally, we write the results to a CSV file.
-```{r loop}
+```{r output}
 write.csv(cluster_metrics_df, "tabula_muris_copula_and_scace_additional_clustering_metrics.csv")
