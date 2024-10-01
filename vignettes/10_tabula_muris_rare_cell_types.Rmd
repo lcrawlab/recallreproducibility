@@ -1,5 +1,5 @@
 ---
-title: "9. Marker Gene Method Comparison (Supplemental Figure S38)"
+title: "10. Marker Gene Method Comparison (Supplemental Figure S38)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{pbmc_timing}

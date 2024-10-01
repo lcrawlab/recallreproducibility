@@ -36,7 +36,6 @@ set.seed(123456)
 First, we load the Tabula Muris tissue data and set up our parameters.
 
 ```{r parameters_setup}
-
 tissue_files <- list.files(".", pattern = "cluster_results_seurat.rds")
 
 cores <- 6
@@ -47,8 +46,8 @@ timing_df <- data.frame()
 
 
 Then, we loop over each tissue and cluster using the various `recall` methods and `countsplit`  and save the resulting `Seurat` objects for each tissue c(ontaining the cluster labels for each method) to RDS files.
-```{r cluster_data}
 
+```{r cluster_data}
 for (tissue_file in tissue_files) {
   tissue_name <- unlist(strsplit(tissue_file, "_results_seurat.rds"))[1]
   
@@ -91,8 +90,6 @@ for (tissue_file in tissue_files) {
   seurat_obj[["callback_NB-copula"]] <- callback_nb_copula_seurat_obj@meta.data$callback_clusters
   seurat_obj[["callback_Poisson-copula"]] <- callback_poisson_copula_seurat_obj@meta.data$callback_clusters
   seurat_obj[["callback_countsplit"]] <- countsplit_seurat_obj@meta.data$callback_clusters
-  
-  
 
   print("Saving result to rds file")
   saveRDS(seurat_obj, file =  paste0("new_clustering_output/", tissue_name, "_copula_clustering_results.rds" ))

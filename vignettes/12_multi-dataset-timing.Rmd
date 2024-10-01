@@ -1,5 +1,5 @@
 ---
-title: "11. Benchmarking Runtime and Peak Memory Usage on Multiple Datasets"
+title: "12. Benchmarking Runtime and Peak Memory Usage on Multiple Datasets"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{multi-dataset-timing}
