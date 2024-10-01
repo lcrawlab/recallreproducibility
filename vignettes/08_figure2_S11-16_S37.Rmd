@@ -1,5 +1,5 @@
 ---
-title: "7. Tabula Muris Cluster Benchmarking (Figure 2, S11-S16, S37)"
+title: "8. Tabula Muris Cluster Benchmarking (Figure 2, S11-S16, S37)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{figure-2}
