@@ -8,16 +8,17 @@ articles:
   04_figureS9-10: 04_figureS9-10.html
   05_cluster-tabula-muris: 05_cluster-tabula-muris.html
   06_cluster-tabula-muris_additional: 06_cluster-tabula-muris_additional.html
-  07_figure2_S11-16_S37: 07_figure2_S11-16_S37.html
-  08_figure3: 08_figure3.html
-  09_tissue_umaps: 09_tissue_umaps.html
-  10_tabula_muris_rare_cell_types: 10_tabula_muris_rare_cell_types.html
-  11_S39_DE_comparison: 11_S39_DE_comparison.html
-  12_multi-dataset-timing: 12_multi-dataset-timing.html
-  13_seurat_data_and_liver_timing: 13_seurat_data_and_liver_timing.html
-  14_pbmc-timing: 14_pbmc-timing.html
-  15_pbmc-timing-plotting: 15_pbmc-timing-plotting.html
-last_built: 2024-10-01T01:20Z
+  07_get_clustering_metrics: 07_get_clustering_metrics.html
+  08_figure2_S11-16_S37: 08_figure2_S11-16_S37.html
+  09_figure3: 09_figure3.html
+  10_tissue_umaps: 10_tissue_umaps.html
+  11_tabula_muris_rare_cell_types: 11_tabula_muris_rare_cell_types.html
+  12_S39_DE_comparison: 12_S39_DE_comparison.html
+  13_multi-dataset-timing: 13_multi-dataset-timing.html
+  14_seurat_data_and_liver_timing: 14_seurat_data_and_liver_timing.html
+  15_pbmc-timing: 15_pbmc-timing.html
+  16_pbmc-timing-plotting: 16_pbmc-timing-plotting.html
+last_built: 2024-10-01T04:07Z
 urls:
   reference: https://lcrawlab.github.io/recallreproducibility/reference
   article: https://lcrawlab.github.io/recallreproducibility/articles
