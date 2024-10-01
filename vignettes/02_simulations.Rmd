@@ -112,10 +112,7 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   recall_poisson_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Poisson-copula", cores = cores, shared_memory_max = shared_memory_max)
   })$Peak_RAM_Used_MiB
   recall_Poisson_copula_end_time <- Sys.time()
-  
-  #print("running recall Gaussian-copula")
-  #recall_gaussian_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Gaussian-copula", cores = cores)
-  
+
   print("running recall countsplit")
   recall_countsplit_start_time <- Sys.time()
   recall_countsplit_memory <- peakRAM::peakRAM({
@@ -142,7 +139,6 @@ simulation <- function(num_groups, num_cells, num_genes, de_prob, seed, cores, s
   seurat_obj[["recall_NB"]] <- recall_nb_seurat_obj@meta.data$recall_clusters
   seurat_obj[["recall_NB-copula"]] <- recall_nb_copula_seurat_obj@meta.data$recall_clusters
   seurat_obj[["recall_Poisson-copula"]] <- recall_poisson_copula_seurat_obj@meta.data$recall_clusters
-  #seurat_obj[["recall_Gaussian-copula"]] <- recall_gaussian_copula_seurat_obj@meta.data$recall_clusters
   
   seurat_obj[["recall_countsplit"]] <- countsplit_seurat_obj@meta.data$recall_clusters
   
@@ -307,7 +303,6 @@ for (replicate in 1:num_replicates) {
                               recall_NB_metrics_df_row,
                               recall_NB_copula_metrics_df_row,
                               recall_Poisson_copula_metrics_df_row,
-                              #recall_Gaussian_copula_metrics_df_row,
                               recall_countsplit_metrics_df_row,
                               scSHC_metrics_df_row,
                               CHOIR_metrics_df_row)
