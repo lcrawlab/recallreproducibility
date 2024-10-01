@@ -1,5 +1,5 @@
 ---
-title: "5. Clustering Tabula Muris Tissues"
+title: "5. Clustering Tabula Muris Tissues (Figure 2, S11-S16, S37)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{cluster-tabula-muris}
