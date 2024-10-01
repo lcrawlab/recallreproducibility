@@ -1,0 +1,132 @@
+---
+title: "7. Computing Clustering Metrics for Tabula Muris Tissues"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cluster-tabula-muris}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(anndata)
+  library(Seurat)
+})
+
+```
+
+
+First, we define a function for computing all of the metrics.
+```{r metrics_function}
+get_clustering_metrics <- function(seurat_obj,
+                                   tissue_name,
+                                   truth_col,
+                                   cluster_label_name) {
+  
+  ari_results <- pdfCluster::adj.rand.index(seurat_obj@meta.data[[truth_col]], 
+                                    seurat_obj@meta.data[[cluster_label_name]])
+  
+  v_measure_results <- clevr::v_measure(seurat_obj@meta.data[[truth_col]], 
+                                seurat_obj@meta.data[[cluster_label_name]])
+  
+  
+  homogeneity_results <- clevr::homogeneity(seurat_obj@meta.data[[truth_col]], 
+                                    seurat_obj@meta.data[[cluster_label_name]])
+  
+  completeness_results <- clevr::completeness(seurat_obj@meta.data[[truth_col]], 
+                                      seurat_obj@meta.data[[cluster_label_name]])
+  
+  fowlkes_mallows_results <- clevr::fowlkes_mallows(seurat_obj@meta.data[[truth_col]], 
+                                            seurat_obj@meta.data[[cluster_label_name]])
+  jaccard_results <- clusteval::jaccard(seurat_obj@meta.data[[truth_col]], 
+                                seurat_obj@meta.data[[cluster_label_name]])
+  
+  num_clusters <-  length(levels(as.factor(seurat_obj@meta.data[[cluster_label_name]])))
+  method <- cluster_label_name
+  
+  
+  metrics_df_row <- data.frame(tissue_name,
+                               method,
+                               ari_results,
+                               v_measure_results,
+                               fowlkes_mallows_results,
+                               homogeneity_results,
+                               completeness_results,
+                               jaccard_results)
+  return(metrics_df_row)
+}
+```
+
+
+
+
+
+Next we set up our parameters.
+```{r params}
+tissue_files <- list.files(".", pattern = ".h5ad")
+
+timing_df <- data.frame()
+
+cluster_metrics_df  <- data.frame()
+```
+
+
+We loop over the Tabula Muris tissues and calculate the clustering metrics for each method.
+```{r loop}
+for (tissue_file in tissue_files) {
+  tissue_name <- unlist(strsplit(tissue_file, ".h5ad"))[1]
+  
+  print("Processing:")
+  print(tissue_name)
+  
+  print("Loading tissue")
+  adata <- read_h5ad(tissue_file) # read in first from h5ad and convert to Seurat
+  seurat_obj <- CreateSeuratObject(counts = t(adata$X), meta.data = adata$obs)
+    
+  print("recall NB metrics")
+  recall_NB_metrics_df_row <- get_clustering_metrics(seurat_obj,
+                                                       tissue_name,
+                                                       "cell_ontology_class",
+                                                       "recall_NB")
+  
+  print("recall NB-copula metrics")
+  recall_NB_copula_metrics_df_row <- get_clustering_metrics(seurat_obj,
+                                                              tissue_name,
+                                                              "cell_ontology_class",
+                                                              "recall_NB-copula")
+  
+  print("recall Poisson-copula metrics")
+  recall_Poisson_copula_metrics_df_row <- get_clustering_metrics(seurat_obj,
+                                                                   tissue_name,
+                                                                   "cell_ontology_class",
+                                                                   "recall_Poisson-copula")
+  
+  print("recall countsplit metrics")
+  recall_countsplit_metrics_df_row <- get_clustering_metrics(seurat_obj,
+                                                               tissue_name,
+                                                               "cell_ontology_class",
+                                                               "recall_countsplit")
+  
+  print('scAce metrics')
+  scAce_metrics_df_row <- get_clustering_metrics(seurat_obj,
+                                                 tissue_name,
+                                                 "cell_ontology_class",
+                                                 "scace_cluster")
+  
+  
+  print('making table')
+  cluster_metrics_df <- rbind(cluster_metrics_df,
+                              recall_NB_metrics_df_row,
+                              recall_NB_copula_metrics_df_row,
+                              recall_Poisson_copula_metrics_df_row,
+                              recall_countsplit_metrics_df_row,
+                              scAce_metrics_df_row)
+
+}
+```
+
+Finally, we write the results to a CSV file.
+```{r loop}
+write.csv(cluster_metrics_df, "tabula_muris_copula_and_scace_additional_clustering_metrics.csv")

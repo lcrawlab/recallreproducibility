@@ -9,7 +9,15 @@ vignette: >
 
 
 
+```{r setup}
+suppressPackageStartupMessages({
+  library(ggplot2)
+})
+```
 
+
+First, we write a function that will plot the clustering metrics bar plots for the supplementary figures.
+```{r metrics_bar_plot_supplement}
 clustering_metrics_facet_plot_with_additions <- function (cluster_metrics_df, statistic, y_label) 
 {
   # remove underscores from tissue names
@@ -62,10 +70,11 @@ clustering_metrics_facet_plot_with_additions <- function (cluster_metrics_df, st
   
   return(bar_plot)
 }
+```
 
 
-
-
+Second, we write a function that will do plot the clustering metrics bar plots for Figure 2.
+```{r metrics_bar_plot_fig2}
 clustering_metrics_facet_plot_for_figure2 <- function (cluster_metrics_df, statistic, y_label) 
 {
   # remove underscores from tissue names
@@ -121,11 +130,11 @@ clustering_metrics_facet_plot_for_figure2 <- function (cluster_metrics_df, stati
   
   return(bar_plot)
 }
+```
 
 
-library(ggplot2)
-setwd("/Users/alandenadel/Desktop/callback_review_scripts/tabula_muris_additions")
-
+We load the clustering data and plot the relevant clustering evaluation metrics.
+```{r plot_metrics_fig2}
 cluster_metrics_df <- read.csv("cluster_metrics_df.csv", row.names = 1)
 
 cluster_metrics_copula <- read.csv("tabula_muris_copula_additional_clustering_metrics.csv", row.names = 1)
@@ -158,14 +167,14 @@ ggsave("completeness_plot.png", completeness_plot, width = 2 * bar_plot_width, h
 
 jaccard_plot <- clustering_metrics_facet_plot_with_additions(cluster_metrics_df, "jaccard_results", "Jaccard Index")
 ggsave("jaccard_plot.png", jaccard_plot, width = 2 * bar_plot_width, height = bar_plot_height, units = 'px')
+```
 
 
 
 
 
-
-# plot the timing data and rename callback to recall
-
+We load the timing and memory data and plot it.
+```{r plot_timing}
 tissue_timing_df <- read.csv("tissue_timing_df.csv", row.names = 1)
 
 scAce_timing_df <- read.csv("scAce_timing.csv", row.names = 1)
@@ -202,10 +211,11 @@ p <- ggplot2::ggplot(tissue_timing_df, ggplot2::aes(x=method, y=time, fill=metho
   geom_text(vjust = -0.2)
 
 ggsave("fig2_tabula_muris_timing.png", p, width = 4 * 1440, height = 4 * 460, units = "px")
+```
 
 
-
-
+Finally, we plot the UMAPs for Diaphragm and Limb Muscle.
+```{r fig2_umaps}
 # plot UMAPs for two tissues
 
 diaphragm <- readRDS(file = "Diaphragmcluster_results_seurat.rds")
@@ -308,3 +318,4 @@ patchwork_grid <- plot_spacer() + column_label_1 + column_label_2 + column_label
 
 
 ggsave("fig2_umap_grid.png", patchwork_grid, width = 1.8 * 2^13, height = 0.8 * 2^13, units = "px")
+```
