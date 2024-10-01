@@ -162,10 +162,7 @@ method.</p>
 <span>  <span class="va">recall_poisson_copula_seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://lcrawlab.github.io/recall/reference/FindClustersRecall.html" class="external-link">FindClustersRecall</a></span><span class="op">(</span><span class="va">seurat_obj</span>, null_method <span class="op">=</span> <span class="st">"Poisson-copula"</span>, cores <span class="op">=</span> <span class="va">cores</span>, shared_memory_max <span class="op">=</span> <span class="va">shared_memory_max</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span><span class="op">$</span><span class="va">Peak_RAM_Used_MiB</span></span>
 <span>  <span class="va">recall_Poisson_copula_end_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="co">#print("running recall Gaussian-copula")</span></span>
-<span>  <span class="co">#recall_gaussian_copula_seurat_obj &lt;- FindClustersRecall(seurat_obj, null_method = "Gaussian-copula", cores = cores)</span></span>
-<span>  </span>
+<span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"running recall countsplit"</span><span class="op">)</span></span>
 <span>  <span class="va">recall_countsplit_start_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">recall_countsplit_memory</span> <span class="op">&lt;-</span> <span class="fu">peakRAM</span><span class="fu">::</span><span class="fu">peakRAM</span><span class="op">(</span><span class="op">{</span></span>
@@ -192,7 +189,6 @@ method.</p>
 <span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_NB"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_nb_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">recall_clusters</span></span>
 <span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_NB-copula"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_nb_copula_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">recall_clusters</span></span>
 <span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_Poisson-copula"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">recall_poisson_copula_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">recall_clusters</span></span>
-<span>  <span class="co">#seurat_obj[["recall_Gaussian-copula"]] &lt;- recall_gaussian_copula_seurat_obj@meta.data$recall_clusters</span></span>
 <span>  </span>
 <span>  <span class="va">seurat_obj</span><span class="op">[[</span><span class="st">"recall_countsplit"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">countsplit_seurat_obj</span><span class="op">@</span><span class="va">meta.data</span><span class="op">$</span><span class="va">recall_clusters</span></span>
 <span>  </span>
@@ -346,7 +342,6 @@ from the results for each method.</p>
 <span>                              <span class="va">recall_NB_metrics_df_row</span>,</span>
 <span>                              <span class="va">recall_NB_copula_metrics_df_row</span>,</span>
 <span>                              <span class="va">recall_Poisson_copula_metrics_df_row</span>,</span>
-<span>                              <span class="co">#recall_Gaussian_copula_metrics_df_row,</span></span>
 <span>                              <span class="va">recall_countsplit_metrics_df_row</span>,</span>
 <span>                              <span class="va">scSHC_metrics_df_row</span>,</span>
 <span>                              <span class="va">CHOIR_metrics_df_row</span><span class="op">)</span></span>
