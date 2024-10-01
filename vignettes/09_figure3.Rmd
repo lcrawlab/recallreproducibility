@@ -1,5 +1,5 @@
 ---
-title: "9. Figure 3"
+title: "9. Avoiding Over-clustering Leads to Improved Hypothesis Generation for Downstream Analyses (Figure 3)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{pbmc_timing}
@@ -8,14 +8,29 @@ vignette: >
 ---
 
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(recallreproducibility)
+  library(ggplot2)
+  library(patchwork)
+  library(grid)
+})
+```
 
 
 
-library(callbackreproducibility)
-library(ggplot2)
-library(patchwork)
-library(grid)
 
+
+```{r marker_genes}
 mesenchymal_stem_cells_marker_genes <- c(
   "Col6a3",
   "Col1a1",
@@ -40,22 +55,32 @@ skeletal_muscle_satellite_cell_marker_genes <- c(
   "Chrdl2",
   "Notch3"
 )
+```
 
+
+First, we load the limb muscle seurat object and scale it for plotting the heatmap.
+
+```{r load_limb_muscle}
 limb_muscle <- readRDS("Limb_Musclecluster_results_seurat.rds")
 limb_muscle <- Seurat::ScaleData(limb_muscle, features = rownames(limb_muscle))
+```
 
+
+Next, we sort the cell ontology classes factors so that the cell type with the largest number of cells is first and the cell type with the fewest smallest is last.
+```{r sort_limb_muscle}
 # sort levels by size of group (limb_muscle)
 limb_muscle@meta.data$cell_ontology_class <- as.factor(limb_muscle@meta.data$cell_ontology_class)
 sorted_limb_muscle_clusters <- names(sort(summary(as.factor(na.omit(limb_muscle@meta.data$cell_ontology_class))), decreasing = TRUE))
 limb_muscle@meta.data$cell_ontology_class <- factor(limb_muscle@meta.data$cell_ontology_class, levels = sorted_limb_muscle_clusters)
+```
 
 
 
-
-
+We define a function for plotting the grid of UMAPs.
+```{r umap_function}
 revision_fig3_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.6, 0.2)) {  
   louvain_default <- custom_scatter(tissue, "umap", group_by = "seurat_clusters", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2, label=FALSE) + Seurat::NoLegend()
-  louvain_recall <- custom_scatter(tissue, "umap", group_by = "callback_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) + Seurat::NoLegend() 
+  louvain_recall <- custom_scatter(tissue, "umap", group_by = "recall_idents", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) + Seurat::NoLegend() 
   cell_ontology <- custom_scatter(tissue, "umap", group_by = "cell_ontology_class", x_title = "UMAP 1", y_title = "UMAP 2", pt.size = 2) + 
     ggplot2::theme(legend.position = legend_pos,
                    legend.text = ggplot2::element_text(size=20)) + 
@@ -74,24 +99,21 @@ revision_fig3_scatter_plots <- function(tissue, tissue_name, legend_pos=c(0.6, 0
   
   return(umap_grid)
 }
+```
 
 
 
+We plot and save UMAP scatterplots of the Cell Ontology Class, the Seurat default clusters, and the recall clusters.
 
+```{r umap_limb_muscle}
 fig_3_umap_grid <- revision_fig3_scatter_plots(limb_muscle, "limb_muscle", legend_pos = c(0.1, 0.8))
 
 ggplot2::ggsave("fig3_revision__umap_grid.png", fig_3_umap_grid, width = 4.4 * 2^11, height = 1 * 2^11, units = "px")
+```
 
 
-
-
-
-
-# heatmaps don't have callback anywhere in the plots, so they don't need re-plotted
-
-# scatterplots don't have callback anywhere in the plots, so they don't need re-plotted
-
-
+We define a function for plotting the volcano plots.
+```{r volcano_function}
 # new volcano plots
 
 revision_fig3_volcano_plots <- function(tissue, tissue_name,
@@ -184,9 +206,9 @@ revision_fig3_volcano_plots <- function(tissue, tissue_name,
   
   
   # re-index clusters to be one-based
-  tissue@meta.data$callback_idents <- as.factor(as.numeric(tissue@meta.data$callback_idents))
+  tissue@meta.data$recall_idents <- as.factor(as.numeric(tissue@meta.data$recall_idents))
   
-  Seurat::Idents(tissue) <- tissue@meta.data$callback_idents
+  Seurat::Idents(tissue) <- tissue@meta.data$recall_idents
   #DimPlot(tissue)
   
   recall_markers <- Seurat::FindMarkers(tissue,
@@ -218,10 +240,12 @@ revision_fig3_volcano_plots <- function(tissue, tissue_name,
   
   
   return(list("volcano_recall" = volcano_recall, "volcano_default" = volcano_default))
-  
 }
+```
 
+Finally, we do differential expression testing between the callback cluster corresponding to skeletal mucle satellite cells and the callback cluster corresponding to mesenchymal stem cell cluster as well as two of the Seurat clusters that correspond to the same cell types. Notice that the P-values produced after clustering with recall are more significant due to the increased sample size from correctly clustering the two cell types.
 
+```{r plot_volcanos}
 volcanos = revision_fig3_volcano_plots(limb_muscle, "limb_muscle", recall_cluster1 = 1,
                               recall_cluster2 = 2,
                               default_cluster1 = 1,
@@ -233,3 +257,4 @@ volcanos = revision_fig3_volcano_plots(limb_muscle, "limb_muscle", recall_cluste
 
 ggplot2::ggsave("fig3_revision_limb_muscle_volcano_plot_default.png", volcanos$volcano_default, width = 2^12, height = 2^12, units = "px")
 ggplot2::ggsave("fig3_revision_limb_muscle_volcano_plot_recall.png", volcanos$volcano_recall, width = 2^12,  height = 2^12, units = "px")
+```
