@@ -21,7 +21,7 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
   
-  library(callback)
+  library(recall)
 })
 
 set.seed(123456)
@@ -61,48 +61,48 @@ for (tissue_file in tissue_files) {
   p <- 1000
   #tissue <- seurat_workflow(tissue, num_variable_features = p, algorithm="louvain", resolution_param = 0.8)
   
-  print("running callback negative binomial")
-  callback_NB_start_time <- Sys.time()
-  callback_nb_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB", cores = cores) #,resolution_start = 2.4)
-  callback_NB_end_time <- Sys.time()
+  print("running recall negative binomial")
+  recall_NB_start_time <- Sys.time()
+  recall_nb_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "NB", cores = cores) #,resolution_start = 2.4)
+  recall_NB_end_time <- Sys.time()
   
-  print("running callback NB-copula")
-  callback_NB_copula_start_time <- Sys.time()
-  callback_nb_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "NB-copula", cores = cores)
-  callback_NB_copula_end_time <- Sys.time()
+  print("running recall NB-copula")
+  recall_NB_copula_start_time <- Sys.time()
+  recall_nb_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "NB-copula", cores = cores)
+  recall_NB_copula_end_time <- Sys.time()
   
-  print("running callback Poisson-copula")
-  callback_Poisson_copula_start_time <- Sys.time()
-  callback_poisson_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Poisson-copula", cores = cores)
-  callback_Poisson_copula_end_time <- Sys.time()
+  print("running recall Poisson-copula")
+  recall_Poisson_copula_start_time <- Sys.time()
+  recall_poisson_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Poisson-copula", cores = cores)
+  recall_Poisson_copula_end_time <- Sys.time()
   
-  #print("running callback Gaussian-copula")
-  #callback_gaussian_copula_seurat_obj <- FindClustersCallback(seurat_obj, null_method = "Gaussian-copula", cores = cores)
+  #print("running recall Gaussian-copula")
+  #recall_gaussian_copula_seurat_obj <- FindClustersRecall(seurat_obj, null_method = "Gaussian-copula", cores = cores)
   
-  print("running callback countsplit")
-  callback_countsplit_start_time <- Sys.time()
-  countsplit_seurat_obj <- callback::FindClustersCountsplit(seurat_obj, cores = cores)
-  callback_countsplit_end_time <- Sys.time()
+  print("running recall countsplit")
+  recall_countsplit_start_time <- Sys.time()
+  countsplit_seurat_obj <- recall::FindClustersCountsplit(seurat_obj, cores = cores)
+  recall_countsplit_end_time <- Sys.time()
   
   print("storing cluster labels")
   
-  seurat_obj[["callback_NB"]] <- callback_nb_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["callback_NB-copula"]] <- callback_nb_copula_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["callback_Poisson-copula"]] <- callback_poisson_copula_seurat_obj@meta.data$callback_clusters
-  seurat_obj[["callback_countsplit"]] <- countsplit_seurat_obj@meta.data$callback_clusters
+  seurat_obj[["recall_NB"]] <- recall_nb_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_NB-copula"]] <- recall_nb_copula_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_Poisson-copula"]] <- recall_poisson_copula_seurat_obj@meta.data$recall_clusters
+  seurat_obj[["recall_countsplit"]] <- countsplit_seurat_obj@meta.data$recall_clusters
 
   print("Saving result to rds file")
   saveRDS(seurat_obj, file =  paste0("new_clustering_output/", tissue_name, "_copula_clustering_results.rds" ))
   
   # todo time taken for each of the new/copula methods
-  callback_NB_time_taken <- difftime(callback_NB_end_time, callback_NB_start_time, units="mins")
-  callback_NB_copula_time_taken <- difftime(callback_NB_copula_end_time, callback_NB_copula_start_time, units="mins")
-  callback_Poisson_copula_time_taken <- difftime(callback_Poisson_copula_end_time, callback_Poisson_copula_start_time, units="mins")
-  callback_countsplit_time_taken <- difftime(callback_countsplit_end_time, callback_countsplit_start_time, units="mins")
+  recall_NB_time_taken <- difftime(recall_NB_end_time, recall_NB_start_time, units="mins")
+  recall_NB_copula_time_taken <- difftime(recall_NB_copula_end_time, recall_NB_copula_start_time, units="mins")
+  recall_Poisson_copula_time_taken <- difftime(recall_Poisson_copula_end_time, recall_Poisson_copula_start_time, units="mins")
+  recall_countsplit_time_taken <- difftime(recall_countsplit_end_time, recall_countsplit_start_time, units="mins")
 
   tissue <- c(tissue_name, tissue_name, tissue_name, tissue_name)
-  method <- c("callback_NB", "callback_NB-copula", "callback_Poisson-copula", "callback_countsplit")
-  time <- c(callback_NB_time_taken, callback_NB_copula_time_taken, callback_Poisson_copula_time_taken, callback_countsplit_time_taken)
+  method <- c("recall_NB", "recall_NB-copula", "recall_Poisson-copula", "recall_countsplit")
+  time <- c(recall_NB_time_taken, recall_NB_copula_time_taken, recall_Poisson_copula_time_taken, recall_countsplit_time_taken)
   
   timing_df_new_row <- data.frame(tissue, method, time)
   
