@@ -1,0 +1,212 @@
+---
+title: "6. Rare Cell Type Marker Gene Titraion Simulations (Supplemental Figure S10)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pbmc_timing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(splatter)
+  library(Seurat)
+  library(SeuratObject)
+  library(SeuratDisk)
+
+  library(LaplacesDemon)
+  
+  library(patchwork)
+  library(grid)
+  
+  library(recall)
+  library(scSHC)
+  library(CHOIR)
+})
+
+
+set.seed(1234)
+```
+
+
+
+
+
+
+
+First, we set up a function for generating the rare cell marker gene titration scenarios.
+```{r rare_cell_type_functions}
+marker_gene_type_simulation <- function(total_num_cells,
+                                        num_genes,
+                                        cell_type_proportions,
+                                        num_replicates,
+                                        de_prob) {
+  
+  # set up vectors for results
+  num_groups <- c()
+  num_cells <- c()
+  de_probs <- c()
+  replicate <- c()
+  
+  recall_num_clusters <- c()
+  scSHC_num_clusters <- c()
+  CHOIR_num_clusters <- c()
+  
+  for (i in 1:num_replicates) {
+    
+    sim.groups <- splatter::splatSimulate(group.prob = cell_type_proportions, method = "groups",
+                                          verbose = FALSE,
+                                          nGenes = num_genes,
+                                          batchCells = total_num_cells,
+                                          dropout.type = "experiment", 
+                                          de.prob = de_prob)
+    
+    seurat_obj <- Seurat::as.Seurat(sim.groups, counts = "counts", data = NULL)
+    seurat_obj <- SeuratObject::RenameAssays(object = seurat_obj, originalexp = 'RNA')
+  
+        
+    seurat_obj <- NormalizeData(seurat_obj)
+    seurat_obj <- FindVariableFeatures(seurat_obj)
+    seurat_obj <- ScaleData(seurat_obj)
+    seurat_obj <- RunPCA(seurat_obj)
+    seurat_obj <- FindNeighbors(seurat_obj)
+        
+    
+    # save file to h5ad for scAce clustering
+    # this also fixes a bug in CHOIR using Seuratv5
+    seurat_obj[["RNA3"]] <- as(object = seurat_obj[["RNA"]], Class = "Assay")
+    DefaultAssay(seurat_obj) <- "RNA3"
+    seurat_obj[["RNA"]] <- NULL
+    seurat_obj[["RNA"]] <- seurat_obj[["RNA3"]]
+    DefaultAssay(seurat_obj) <- "RNA"
+    seurat_obj[["RNA3"]] <- NULL
+    
+    # todo change this name
+    filename = stringr::str_interp("h5ad_dir/simulated_${total_num_cells}_cells_${length(cell_type_proportions)}_groups_${min(de_prob)}de_prob_replicate_${i}.h5Seurat")
+    SaveH5Seurat(seurat_obj, filename = filename)
+    Convert(filename, dest = "h5ad")
+    
+    
+    
+    cores = 12
+    
+    # run recall
+    print("Running recall")
+    seurat_obj <- recall::FindClustersRecall(seurat_obj, cores=cores, reduction_percentage = 0.1)
+    
+    # run sc-SHC
+    print("Running sc-SHC")
+    scSHC_clusters <- scSHC(GetAssayData(seurat_obj,
+                                         assay = "RNA", layer = "counts")[Seurat::VariableFeatures(seurat_obj),],
+                            num_features = length(VariableFeatures(seurat_obj)),
+                            num_PCs = 10,
+                            cores = cores)[[1]]
+    
+    # run CHOIR
+    print("Running CHOIR")
+    seurat_obj <- CHOIR(seurat_obj, 
+                        n_cores = cores,
+                        reduction = seurat_obj@reductions$pca@cell.embeddings[, 1:10],
+                        var_features = Seurat::VariableFeatures(seurat_obj))
+    
+    
+    
+    # store cluster labels
+    seurat_obj[['scSHC_clusters']] <- scSHC_clusters
+    seurat_obj[["CHOIR_clusters"]] <- seurat_obj@meta.data$CHOIR_clusters_0.05
+    
+    
+    print("Num Clusters:")
+    print(length(levels(seurat_obj@meta.data$recall_clusters)))
+    
+    num_groups[i] <- length(cell_type_proportions)
+    num_cells[i] <- total_num_cells
+    replicate[i] <- i
+    de_probs[i] <- min(de_prob)
+    
+    recall_num_clusters[i] <- length(unique(seurat_obj@meta.data$recall_clusters))
+    scSHC_num_clusters[i] <- length(unique(seurat_obj@meta.data$scSHC_clusters))
+    CHOIR_num_clusters[i] <- length(unique(seurat_obj@meta.data$CHOIR_clusters))
+      
+  }
+  
+  # save downsampled files for scAce
+  # todo add sc-SHC, CHOIR, scAce
+  return(data.frame(num_groups, num_cells, replicate, de_probs, recall_num_clusters, scSHC_num_clusters, CHOIR_num_clusters))
+}
+```
+
+
+
+
+
+Now, we actually loop over the simulation parameters and run the simulations.
+```{r run_simulations}
+num_groups_list <- c(5, 10, 20)
+num_cells_list <- c(5000, 10000, 20000)
+de_proportions <- c(0.1, 0.05, 0.02, 0.01)
+num_replicates <- 5
+
+df <- data.frame()
+
+for (num_groups in num_groups_list) {
+  for (num_cells in num_cells_list) {
+    for (de_proportion in de_proportions) {
+      print("num_groups")
+      print(num_groups)
+      print("num_cells")
+      print(num_cells)
+
+      # rare cell type is 1%
+      # rest are equally sized
+      cell_type_proportions <- c(rep(0.99 / (num_groups - 1), num_groups - 1), 0.01)
+      
+      # rare cell type is titrated, rest are 10%
+      group_de_prob <- c(rep(0.1, (num_groups - 1)), de_proportion)
+      
+      print("cell_type_proportions")
+      print(cell_type_proportions)
+      
+      print("de_proportion")
+      print(de_proportion)
+
+      
+      ret <- marker_gene_type_simulation(total_num_cells = num_cells,
+                                         num_genes = 1000,
+                                         cell_type_proportions = cell_type_proportions,
+                                         num_replicates = num_replicates, 
+                                         de_prob = group_de_prob)
+
+      print(ret)
+      
+      df <- rbind(df, ret)
+    
+    }
+  }
+}
+```
+
+
+Finally, we save the results.
+```{r save_results}
+filename = stringr::str_interp("marker_genes_simulations.csv")
+
+print("writing output csv")
+print(filename)
+
+write.csv(df, filename)
+```
+
+
+
+

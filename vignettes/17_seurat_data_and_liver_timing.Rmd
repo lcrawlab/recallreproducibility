@@ -1,5 +1,5 @@
 ---
-title: "14. Plotting Runtime and Peak Memory Usage for Multiple Tissues (Supplemental Figures S26 and S27)"
+title: "17. Plotting Runtime and Peak Memory Usage for Multiple Tissues (Supplemental Figures S26 and S27)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{seurat_data_and_liver_timing}

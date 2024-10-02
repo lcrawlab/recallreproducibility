@@ -1,8 +1,0 @@
----
-title: "4. Rare Cell Type Simulations (Supplemental Fiures S9-S10)"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{pbmc_timing}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----

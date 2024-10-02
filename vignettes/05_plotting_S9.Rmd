@@ -1,0 +1,120 @@
+---
+title: "5. Rare Cell Type Simulation Plottings (Supplemental Figures S9)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pbmc_timing}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+```{r setup}
+library(ggplot2)
+library(reshape2)
+library(scales)
+
+library(Seurat)
+```
+
+
+
+
+
+
+First, we load all of the data from the simulations.
+```{r setup}
+df5_5k <- read.csv("rare_cell_type_5000_cells_5.csv", row.names = 1)
+df5_10k <- read.csv("rare_cell_type_10000_cells_5.csv", row.names = 1)
+df10_5k <- read.csv("rare_cell_type_5000_cells_10.csv", row.names = 1)
+df10_10k <- read.csv("rare_cell_type_10000_cells_10.csv", row.names = 1)
+
+
+scAce <- read.csv('scAce_results.csv')
+scAce$X <- NULL
+scAce$original_num_cells <- scAce$num_cells
+scAce$num_cells <- NULL
+scAce$downsampled_count <- scAce$num_downsampled
+scAce$num_downsampled <- NULL
+scAce <- subset(scAce, num_groups < 20)
+
+
+df <- rbind(df5_5k,
+            df5_10k,
+            df10_5k,
+            df10_10k)
+
+
+
+df <- melt(df, measure.vars = c("recall_num_clusters", "scSHC_num_clusters", "CHOIR_num_clusters" ))
+scAce <- melt(scAce, measure.vars = c("scAce_num_clusters"))
+
+df <- rbind(df, scAce)
+
+df <- subset(df, downsampled_count < 250)
+```
+
+
+Next, we summarize the mean and standard deviation of the number of clusters.
+```{r summarize}
+df <- df %>% dplyr::group_by(across(all_of(c("num_groups", "original_num_cells", "downsampled_count", "variable")))) %>% dplyr::summarize(
+  mean = mean(value), 
+  sd = stats::sd(value))
+```
+
+We plot the summarized data.
+```{r plotting}
+small_text_size <- 12
+large_text_size <- 16
+
+linewidth = 2
+pt_size = 4
+
+facet_labels <- c(
+  `5` = "5 Groups",
+  `10` = "10 Groups",
+  `20` = "20 Groups",
+  `5000` = "N = 5K",
+  `10000` = "N = 10K",
+  `20000` = "N = 20K"
+)
+
+p <- ggplot(df) +
+  geom_bar(aes(x=downsampled_count, y=mean, fill=variable), stat="identity", position=position_dodge2(), alpha = 0.7, colour = 'black') +
+  geom_errorbar(aes(x=downsampled_count, ymin=ifelse(mean-sd< 0, 0, mean-sd), ymax=mean+sd), position = position_dodge2(), size=1) + 
+  facet_grid(rows=vars(original_num_cells), cols = vars(num_groups), labeller=as_labeller(facet_labels)) + 
+  geom_hline(aes(yintercept=num_groups), linetype="dashed", size=linewidth) +  
+  expand_limits(y=0) +
+  theme_bw() + 
+  ggplot2::scale_fill_manual(values = c("red", "grey", "black", "tan"), labels = c('recall','sc-SHC','CHOIR', "scAce")) +
+  ggplot2::scale_y_continuous(breaks = breaks_pretty()) +
+  #ggplot2::scale_x_continuous(breaks = c(0.01, 0.02, 0.05, 0.1)) +
+  #scale_y_continuous(breaks=seq(0,150,30)) + 
+  scale_x_continuous(breaks=seq(0,200,50)) + 
+  ggplot2::xlab("Number of Cells in Downsampled Cluster") + 
+  ggplot2::ylab("Number of Clusters Detected") +
+  ggplot2::labs(color = "Method") + 
+  #ggplot2::annotate("label", x = 10, y = annotation_pos, label = "Num. True Groups", size = 6) +
+  ggplot2::theme(axis.text = ggplot2::element_text(size = small_text_size),
+                 axis.title = ggplot2::element_text(size = large_text_size),
+                 strip.text = ggplot2::element_text(size = small_text_size), 
+                 legend.text = ggplot2::element_text(size = small_text_size, family = "Courier"),
+                 legend.title = ggplot2::element_text(size = small_text_size))
+
+ggsave(filename = "rare_cell_types.png", p, width = 3.4 * 1440, height = 2 * 1440, units = 'px')
+```
+
+![](umap_grids/rare_cell_types.png){width=100%}
+
+
+
+
+

@@ -1,5 +1,5 @@
 ---
-title: "15. Benchmarking Runtime and Peak Memory Usage on PBMC Subsets (Supplemental Figures S42 and S43)"
+title: "18. Benchmarking Runtime and Peak Memory Usage on PBMC Subsets (Supplemental Figures S42 and S43)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{pbmc-timing}
