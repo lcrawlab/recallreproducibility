@@ -31,7 +31,7 @@ library(Seurat)
 
 
 First, we load all of the data from the simulations.
-```{r setup}
+```{r load_data}
 df5_5k <- read.csv("rare_cell_type_5000_cells_5.csv", row.names = 1)
 df5_10k <- read.csv("rare_cell_type_10000_cells_5.csv", row.names = 1)
 df10_5k <- read.csv("rare_cell_type_5000_cells_10.csv", row.names = 1)
