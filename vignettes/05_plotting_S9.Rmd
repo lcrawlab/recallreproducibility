@@ -112,7 +112,7 @@ p <- ggplot(df) +
 ggsave(filename = "rare_cell_types.png", p, width = 3.4 * 1440, height = 2 * 1440, units = 'px')
 ```
 
-![](umap_grids/rare_cell_types.png){width=100%}
+![](rare_cell_types.png){width=100%}
 
 
 
