@@ -1,5 +1,5 @@
 ---
-title: "6. Rare Cell Type Marker Gene Titraion Simulations (Supplemental Figure S10)"
+title: "6. Rare Cell Type Marker Gene Titraton Simulations (Supplemental Figure S10)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{pbmc_timing}
