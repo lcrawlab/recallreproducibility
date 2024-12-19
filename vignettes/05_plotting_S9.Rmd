@@ -1,5 +1,5 @@
 ---
-title: "5. Rare Cell Type Simulation Plottings (Supplemental Figure S9)"
+title: "5. Rare Cell Type Simulation Plotting (Supplemental Figure S9)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{pbmc_timing}
