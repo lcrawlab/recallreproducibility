@@ -152,8 +152,8 @@ marker_gene_type_simulation <- function(total_num_cells,
 
 Now, we actually loop over the simulation parameters and run the simulations.
 ```{r run_simulations}
-num_groups_list <- c(5, 10, 20)
-num_cells_list <- c(5000, 10000, 20000)
+num_groups_list <- c(5, 10)
+num_cells_list <- c(5000, 10000)
 de_proportions <- c(0.1, 0.05, 0.02, 0.01)
 num_replicates <- 5
 
