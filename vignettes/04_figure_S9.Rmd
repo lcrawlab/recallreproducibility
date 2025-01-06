@@ -175,7 +175,7 @@ Now, we actually loop over the simulation parameters and run the simulations.
 ```{r run_simulations}
 
 num_groups_list <- c(5, 10)
-num_cells_list <- c(5000, 10000, 15000)
+num_cells_list <- c(5000, 10000)
 
 for (num_groups in num_groups_list) {
   for (num_cells in num_cells_list) {
