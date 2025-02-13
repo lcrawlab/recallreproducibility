@@ -3,7 +3,7 @@
 
 ## Introduction
 
-We hope to make it as simple as possible to reproduce the results found in `A knockoff calibration method to avoid over-clustering in single-cell RNA-sequencing`.
+We hope to make it as simple as possible to reproduce the results found in our paper `Artificial variables help to avoid over-clustering in single-cell RNA-sequencing`.
 To that end, we have organized our analysis scripts as a series of `R` vignettes in this repository.
 
 ## Reproducing Figures from the `recall` manuscript
